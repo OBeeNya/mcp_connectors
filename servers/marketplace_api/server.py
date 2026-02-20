@@ -2,6 +2,9 @@ from mcp.server.fastmcp import FastMCP
 import json
 from pathlib import Path
 from typing import Literal
+from dotenv import load_dotenv
+
+load_dotenv()
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 SPECS_DIR = Path(__file__).parent / "specs"
@@ -256,5 +259,9 @@ You are designing the rate limiting and retry strategy for the {marketplace} con
 """
 
 
-if __name__ == "__main__":
+def main():
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

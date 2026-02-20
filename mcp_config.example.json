@@ -1,0 +1,31 @@
+{
+  "_comment": [
+    "MCP server configuration for Claude Desktop and Claude Code.",
+    "",
+    "CLAUDE CODE (CLI):",
+    "  Run once to register:",
+    "    claude mcp add marketplace-api -- uv --directory /path/to/this/repo run marketplace-api-server",
+    "",
+    "CLAUDE DESKTOP:",
+    "  Merge the 'mcpServers' block below into your Claude Desktop config file.",
+    "  Config file locations:",
+    "    macOS:   ~/Library/Application Support/Claude/claude_desktop_config.json",
+    "    Windows: %APPDATA%\\Claude\\claude_desktop_config.json",
+    "    Linux:   ~/.config/Claude/claude_desktop_config.json",
+    "",
+    "  Replace /absolute/path/to/this/repo with the actual path on your machine.",
+    "  On Windows use double backslashes: C:\\\\Users\\\\you\\\\marketplace-connectors-mcp"
+  ],
+  "mcpServers": {
+    "marketplace-api": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/this/repo",
+        "run",
+        "marketplace-api-server"
+      ],
+      "env": {}
+    }
+  }
+}

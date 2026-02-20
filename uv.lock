@@ -282,10 +282,14 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "mcp", extra = ["cli"] },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "mcp", extras = ["cli"], specifier = ">=1.0.0" }]
+requires-dist = [
+    { name = "mcp", extras = ["cli"], specifier = ">=1.0.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+]
 
 [[package]]
 name = "mcp"

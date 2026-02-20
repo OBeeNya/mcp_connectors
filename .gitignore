@@ -8,3 +8,17 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Secrets — never commit real credentials
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
