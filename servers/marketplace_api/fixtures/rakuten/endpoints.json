@@ -1,0 +1,171 @@
+{
+  "orders": [
+    {
+      "name": "searchOrder",
+      "method": "GET",
+      "path": "/es/1.0/order/searchOrder/",
+      "description": "Search orders by date range, status, or order number. Primary polling endpoint.",
+      "required_params": ["dateTimeOrderFrom", "dateTimeOrderTo"],
+      "filter_params": ["orderProgressList", "orderNumber", "itemName"],
+      "pagination_params": ["PaginationOffset", "PaginationLimit"],
+      "pagination": "offset_based",
+      "max_page_size": 100,
+      "order_statuses": {
+        "100": "Awaiting confirmation",
+        "200": "Confirmed",
+        "300": "Awaiting payment",
+        "400": "Payment confirmed",
+        "500": "Processing",
+        "600": "Shipped",
+        "700": "Cancelled"
+      },
+      "use_case": "Delta sync: query with dateTimeOrderFrom = last_sync_timestamp, dateTimeOrderTo = now.",
+      "gotchas": [
+        "Orders do NOT auto-confirm. You must call confirmOrder explicitly for status 100 → 200.",
+        "Response is XML by default. Add Accept: application/json header for JSON (only on v2.0+ endpoints).",
+        "Date range cannot exceed 31 days per query."
+      ]
+    },
+    {
+      "name": "getOrder",
+      "method": "GET",
+      "path": "/es/1.0/order/getOrder/",
+      "description": "Returns full details for a specific order including line items and buyer info.",
+      "required_params": ["orderNumber"],
+      "use_case": "Fetch complete order details after discovering the order via searchOrder."
+    },
+    {
+      "name": "confirmOrder",
+      "method": "POST",
+      "path": "/es/1.0/order/confirmOrder/",
+      "description": "Explicitly confirms a new order (status 100 → 200). Required before processing.",
+      "required_params": ["orderNumber"],
+      "use_case": "Must be called for all new orders before picking and packing. Rakuten does not auto-confirm.",
+      "gotchas": ["Confirmation is irreversible. Only confirm orders you intend to fulfill."]
+    },
+    {
+      "name": "updateOrderShipping",
+      "method": "POST",
+      "path": "/es/1.0/order/updateOrderShipping/",
+      "description": "Updates shipping information (carrier, tracking number) and advances order to shipped status.",
+      "required_params": ["orderNumber", "deliveryCompany", "shipNumber"],
+      "use_case": "Submit tracking after dispatch. Advances order status to 600 (Shipped).",
+      "carrier_codes": {
+        "delivery_company": "Carrier code as defined in Rakuten's delivery company list (JP: Yamato=1, Sagawa=2, Japan Post=3)"
+      }
+    }
+  ],
+  "catalog": [
+    {
+      "name": "item_get",
+      "method": "GET",
+      "path": "/es/1.0/item/get/",
+      "description": "Returns product data for a specific item by manage number.",
+      "required_params": ["itemUrl"],
+      "use_case": "Retrieve current product state before performing an update."
+    },
+    {
+      "name": "item_search",
+      "method": "GET",
+      "path": "/es/1.0/item/search/",
+      "description": "Search items in the shop by keyword, genre, or status.",
+      "optional_params": ["keyword", "genreId", "itemPublicStatus", "PaginationOffset", "PaginationLimit"],
+      "pagination": "offset_based",
+      "max_page_size": 100,
+      "use_case": "Fetch full catalog for reconciliation or bulk operations."
+    },
+    {
+      "name": "item_insert",
+      "method": "POST",
+      "path": "/es/1.0/item/insert/",
+      "description": "Creates a new product listing on Rakuten Ichiba.",
+      "required_fields": [
+        "itemUrl (unique slug for the item)",
+        "itemNumber (your internal SKU)",
+        "itemName",
+        "itemPrice",
+        "genreId (from Navigation API)",
+        "catchCopy (short headline)",
+        "itemCaption (HTML allowed)",
+        "imageUrl"
+      ],
+      "use_case": "Create a new product. itemUrl must be unique within the shop.",
+      "gotchas": [
+        "genreId must be a valid leaf genre from the Navigation API — cannot use parent genres.",
+        "HTML is allowed (and common) in itemCaption — Rakuten shop pages are highly customized.",
+        "itemUrl is permanent and cannot be changed after creation."
+      ]
+    },
+    {
+      "name": "item_update",
+      "method": "POST",
+      "path": "/es/1.0/item/update/",
+      "description": "Updates product data for an existing item.",
+      "required_params": ["itemUrl"],
+      "use_case": "Update title, description, price, or images for an existing product."
+    },
+    {
+      "name": "item_delete",
+      "method": "POST",
+      "path": "/es/1.0/item/delete/",
+      "description": "Deletes (deactivates) a product listing.",
+      "required_params": ["itemUrl"],
+      "use_case": "Remove a discontinued or out-of-stock product from the shop."
+    }
+  ],
+  "inventory": [
+    {
+      "name": "inventory_getInventory",
+      "method": "GET",
+      "path": "/es/2.0/inventory/getInventory/",
+      "description": "Returns current stock quantity for an item and its variants.",
+      "required_params": ["itemUrl"],
+      "use_case": "Retrieve current stock level before updating."
+    },
+    {
+      "name": "inventory_updateInventory",
+      "method": "POST",
+      "path": "/es/2.0/inventory/updateInventory/",
+      "description": "Updates stock quantity for an item and its variants.",
+      "required_params": ["itemUrl", "horizontalName OR verticalName (for variants)", "inventoryCount"],
+      "use_case": "Primary endpoint for stock synchronization. Supports variant-level inventory control.",
+      "gotchas": ["For items with variants (size/color), you must specify variant axes. For simple items, omit variant params."]
+    }
+  ],
+  "fulfillment": [
+    {
+      "name": "updateOrderShipping",
+      "method": "POST",
+      "path": "/es/1.0/order/updateOrderShipping/",
+      "description": "Submit carrier and tracking number after dispatch.",
+      "required_params": ["orderNumber", "deliveryCompany", "shipNumber"],
+      "use_case": "Fulfillment completion step — updates order status to Shipped."
+    }
+  ],
+  "reports": [
+    {
+      "name": "searchOrder (date range)",
+      "method": "GET",
+      "path": "/es/1.0/order/searchOrder/",
+      "description": "Rakuten does not have a dedicated reports API. Use searchOrder with broad date ranges for reporting.",
+      "use_case": "Generate order summaries by querying date ranges up to 31 days.",
+      "note": "For larger exports, use the RMS management console CSV export."
+    }
+  ],
+  "returns": [
+    {
+      "name": "updateOrderCancel",
+      "method": "POST",
+      "path": "/es/1.0/order/updateOrderCancel/",
+      "description": "Cancels an order and optionally initiates a refund.",
+      "required_params": ["orderNumber", "cancelReasonId"],
+      "use_case": "Process order cancellations and buyer-initiated returns.",
+      "cancel_reason_ids": {
+        "1": "Buyer request",
+        "2": "Out of stock",
+        "3": "Wrong item shipped",
+        "4": "Other"
+      }
+    }
+  ]
+}

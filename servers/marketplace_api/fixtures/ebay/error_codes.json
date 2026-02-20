@@ -1,0 +1,90 @@
+[
+  {
+    "code": "1001",
+    "http_status": 400,
+    "category": "REQUEST",
+    "description": "Missing or invalid request parameter.",
+    "retryable": false,
+    "action": "Check the request body/params against the API schema. Do not retry."
+  },
+  {
+    "code": "1100",
+    "http_status": 401,
+    "category": "AUTH",
+    "description": "OAuth token is missing from the request.",
+    "retryable": false,
+    "action": "Ensure the Authorization: Bearer {token} header is present."
+  },
+  {
+    "code": "1101",
+    "http_status": 401,
+    "category": "AUTH",
+    "description": "OAuth token has expired.",
+    "retryable": true,
+    "action": "Refresh the access token using the refresh_token and retry the request once."
+  },
+  {
+    "code": "1102",
+    "http_status": 403,
+    "category": "AUTH",
+    "description": "The application does not have the required OAuth scope for this operation.",
+    "retryable": false,
+    "action": "Add the missing scope to the OAuth authorization request and re-authorize the seller."
+  },
+  {
+    "code": "25001",
+    "http_status": 404,
+    "category": "INVENTORY",
+    "description": "Inventory item not found for the specified SKU.",
+    "retryable": false,
+    "action": "Verify the SKU. Create the inventory item before creating an offer."
+  },
+  {
+    "code": "25002",
+    "http_status": 409,
+    "category": "INVENTORY",
+    "description": "An offer already exists for this SKU in this marketplace.",
+    "retryable": false,
+    "action": "Use updateOffer instead of createOffer. Retrieve the existing offerId first."
+  },
+  {
+    "code": "25004",
+    "http_status": 422,
+    "category": "INVENTORY",
+    "description": "The offer cannot be published due to listing validation errors (missing required aspects, prohibited content, etc.).",
+    "retryable": false,
+    "action": "Review the errors[] array in the response body. Fix each validation issue. Check getItemAspectsForCategory for required fields."
+  },
+  {
+    "code": "21919301",
+    "http_status": 400,
+    "category": "FULFILLMENT",
+    "description": "Invalid order state for the requested operation.",
+    "retryable": false,
+    "action": "Check the order's lineItems[].lineItemFulfillmentStatus before attempting to create a shipment."
+  },
+  {
+    "code": "35001",
+    "http_status": 429,
+    "category": "RATE_LIMIT",
+    "description": "API call limit reached for the day.",
+    "retryable": true,
+    "action": "Back off and retry. Implement a daily quota tracker to avoid hitting this limit. Prefer bulk endpoints."
+  },
+  {
+    "code": "500",
+    "http_status": 500,
+    "category": "SYSTEM",
+    "description": "Internal eBay server error.",
+    "retryable": true,
+    "action": "Retry with exponential backoff up to 5 times. If all fail, dead-letter and alert."
+  },
+  {
+    "code": "503",
+    "http_status": 503,
+    "category": "SYSTEM",
+    "description": "eBay API is temporarily unavailable (maintenance or overload).",
+    "retryable": true,
+    "action": "Check eBay system status at developer.ebay.com/support. Retry with backoff."
+  }
+]

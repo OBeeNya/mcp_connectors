@@ -1,0 +1,79 @@
+[
+  {
+    "code": "N000",
+    "http_status": 200,
+    "description": "Success. (Rakuten returns error codes inside XML/JSON body even on HTTP 200.)",
+    "retryable": false,
+    "action": "Always parse the body error code — HTTP 200 does not guarantee success."
+  },
+  {
+    "code": "E001",
+    "http_status": 400,
+    "description": "Required parameter is missing or has an invalid value.",
+    "retryable": false,
+    "action": "Check the parameter listed in the error message. Do not retry."
+  },
+  {
+    "code": "E002",
+    "http_status": 400,
+    "description": "Item or order not found for the given identifier.",
+    "retryable": false,
+    "action": "Verify the item manage number or order number. Dead-letter if data came from Rakuten's own API."
+  },
+  {
+    "code": "E003",
+    "http_status": 400,
+    "description": "The operation is not permitted for the current state (e.g. updating a cancelled order).",
+    "retryable": false,
+    "action": "Check the current state of the resource before attempting state-changing operations."
+  },
+  {
+    "code": "E010",
+    "http_status": 401,
+    "description": "Authentication failed. Invalid ServiceSecret or LicenseKey.",
+    "retryable": false,
+    "action": "Verify RAKUTEN_SERVICE_SECRET and RAKUTEN_LICENSE_KEY. Check Base64 encoding and ESA prefix."
+  },
+  {
+    "code": "E011",
+    "http_status": 403,
+    "description": "The shop does not have access to this API service.",
+    "retryable": false,
+    "action": "Contact Rakuten Partner support to enable the required API service for the shop."
+  },
+  {
+    "code": "E020",
+    "http_status": 429,
+    "description": "Request quota exceeded for this service.",
+    "retryable": true,
+    "action": "Apply exponential backoff. Reduce call frequency and batch requests."
+  },
+  {
+    "code": "E050",
+    "http_status": 500,
+    "description": "Rakuten server error. May indicate throttling (Rakuten sometimes returns 500 instead of 429).",
+    "retryable": true,
+    "action": "Check error message. If 'over quota' appears, treat as throttling. Otherwise, retry with backoff up to 5 times."
+  },
+  {
+    "code": "E051",
+    "http_status": 503,
+    "description": "Service temporarily unavailable (maintenance window).",
+    "retryable": true,
+    "action": "Rakuten performs scheduled maintenance. Retry after the maintenance window. Check RMS for maintenance notices."
+  },
+  {
+    "code": "E100",
+    "http_status": 400,
+    "description": "Genre (category) ID is invalid or does not accept products.",
+    "retryable": false,
+    "action": "Use the Navigation API (getGenreInformation) to find valid leaf genre IDs before inserting products."
+  },
+  {
+    "code": "E101",
+    "http_status": 400,
+    "description": "A required item attribute for the genre is missing.",
+    "retryable": false,
+    "action": "Fetch genre-specific required attributes and ensure all are present in the item data."
+  }
+]

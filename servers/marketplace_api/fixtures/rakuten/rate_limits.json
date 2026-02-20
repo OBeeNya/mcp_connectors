@@ -1,0 +1,57 @@
+{
+  "model": "request_quota",
+  "description": "Rakuten RMS enforces per-service request quotas. Limits are defined per service version and are lower than Amazon or eBay — design with batching and caching in mind.",
+  "endpoints": {
+    "searchOrder": {
+      "calls_per_minute": 100,
+      "max_results_per_call": 100,
+      "note": "Use dateTimeOrderFrom/To range filters to limit result set and avoid timeouts."
+    },
+    "getOrder": {
+      "calls_per_minute": 100
+    },
+    "confirmOrder": {
+      "calls_per_minute": 60
+    },
+    "updateOrderShipping": {
+      "calls_per_minute": 60
+    },
+    "item_get": {
+      "calls_per_minute": 100
+    },
+    "item_insert": {
+      "calls_per_minute": 60,
+      "note": "Product creation is slow. Use batch imports for initial catalog load."
+    },
+    "item_update": {
+      "calls_per_minute": 60,
+      "note": "For bulk updates, use the CSV upload endpoint instead of individual item_update calls."
+    },
+    "item_delete": {
+      "calls_per_minute": 60
+    },
+    "inventory_update": {
+      "calls_per_minute": 100
+    },
+    "navigation_getGenreInformation": {
+      "calls_per_minute": 60,
+      "note": "Cache genre data aggressively — category structure changes infrequently (monthly)."
+    }
+  },
+  "throttling_behavior": {
+    "status_code": 429,
+    "error_element": "errorCode in XML response body",
+    "recommended_strategy": "exponential_backoff_with_jitter",
+    "initial_delay_ms": 2000,
+    "multiplier": 2,
+    "jitter": "full",
+    "max_delay_ms": 60000,
+    "max_retries": 4,
+    "implementation_note": "Rakuten can return 500 instead of 429 for throttled requests. Treat 500 errors with an 'over quota' error message as retryable throttling events, not fatal errors."
+  },
+  "caching_recommendations": [
+    "Cache genre (category) tree for 24 hours — it rarely changes.",
+    "Cache shop info for 1 hour.",
+    "Do not cache order data — orders must always be fetched fresh."
+  ]
+}

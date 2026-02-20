@@ -1,0 +1,77 @@
+{
+  "marketplace": "ebay",
+  "display_name": "eBay RESTful APIs",
+  "api_style": "REST",
+  "base_url": "https://api.ebay.com",
+  "versioning": {
+    "strategy": "path-based",
+    "format": "/sell/fulfillment/v1/..., /sell/inventory/v1/...",
+    "note": "Each API family has its own version. eBay versions are stable; breaking changes trigger a major version bump."
+  },
+  "api_groups": [
+    {
+      "name": "Fulfillment API",
+      "version": "v1",
+      "path_prefix": "/sell/fulfillment/v1",
+      "description": "Retrieve and manage buyer orders and shipments for sold items.",
+      "key_operations": ["getOrders", "getOrder", "createShippingFulfillment", "getShippingFulfillment"]
+    },
+    {
+      "name": "Inventory API",
+      "version": "v1",
+      "path_prefix": "/sell/inventory/v1",
+      "description": "Create and manage inventory items (products), offers (listings), and inventory locations.",
+      "key_operations": ["createOrReplaceInventoryItem", "bulkCreateOrReplaceInventoryItem", "createOffer", "publishOffer", "bulkPublishOffer"]
+    },
+    {
+      "name": "Account API",
+      "version": "v1",
+      "path_prefix": "/sell/account/v1",
+      "description": "Manage seller account settings: payment policies, return policies, fulfillment policies.",
+      "key_operations": ["getReturnPolicy", "getFulfillmentPolicy", "getPaymentPolicy"]
+    },
+    {
+      "name": "Analytics API",
+      "version": "v1",
+      "path_prefix": "/sell/analytics/v1",
+      "description": "Access traffic reports, sales performance, and listing quality data.",
+      "key_operations": ["getTrafficReport", "getSellerStandardsProfile"]
+    },
+    {
+      "name": "Browse API",
+      "version": "v1",
+      "path_prefix": "/buy/browse/v1",
+      "description": "Search and retrieve public catalog data (product details, prices, descriptions). Uses application token — no seller auth required.",
+      "key_operations": ["search", "getItem", "getItemsByItemGroup"]
+    },
+    {
+      "name": "Taxonomy API",
+      "version": "v1",
+      "path_prefix": "/commerce/taxonomy/v1",
+      "description": "Navigate eBay category trees and retrieve category-specific item aspects.",
+      "key_operations": ["getCategoryTree", "getCategorySubtree", "getItemAspectsForCategory"]
+    }
+  ],
+  "auth": {
+    "summary": "Standard OAuth2 — Client Credentials for public APIs, Authorization Code for seller APIs",
+    "detail": "See get_auth_config('ebay') for full configuration."
+  },
+  "data_format": "JSON",
+  "pagination": "Offset-based (limit + offset) or cursor-based (next link in response) depending on the endpoint",
+  "sandbox": {
+    "base_url": "https://api.sandbox.ebay.com",
+    "note": "Full sandbox with separate credentials. Register test accounts at developer.ebay.com/my/keys."
+  },
+  "documentation": {
+    "developer_portal": "https://developer.ebay.com/",
+    "api_reference": "https://developer.ebay.com/docs",
+    "changelog": "https://developer.ebay.com/changelog"
+  },
+  "common_gotchas": [
+    "Two different OAuth flows are needed: Client Credentials (application token) for Browse/Taxonomy, Authorization Code (user token) for Sell APIs.",
+    "Inventory items (product data) and Offers (listings with price/quantity) are separate entities — you must create both.",
+    "An offer must be 'published' to be live on eBay. Creating an offer does not make it visible.",
+    "Use bulkCreateOrReplaceInventoryItem and bulkPublishOffer for catalog sync — individual calls are rate-limited.",
+    "The marketplace ID must be passed as the X-EBAY-C-MARKETPLACE-ID header on most sell endpoints."
+  ]
+}

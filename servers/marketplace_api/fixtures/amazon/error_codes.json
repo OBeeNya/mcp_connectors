@@ -1,0 +1,79 @@
+[
+  {
+    "code": "InvalidInput",
+    "http_status": 400,
+    "description": "Request has missing or invalid parameters.",
+    "retryable": false,
+    "action": "Log the full request and response for debugging. Fix the parameters. Do not retry."
+  },
+  {
+    "code": "InvalidSignature",
+    "http_status": 403,
+    "description": "The AWS SigV4 signature on the request is invalid.",
+    "retryable": false,
+    "action": "Check clock skew (must be within 5 minutes of AWS time), region, and signing library configuration."
+  },
+  {
+    "code": "Unauthorized",
+    "http_status": 403,
+    "description": "The LWA access token is missing, invalid, or expired.",
+    "retryable": true,
+    "action": "Refresh the LWA access token and retry the request once. If it fails again after refresh, alert."
+  },
+  {
+    "code": "Forbidden",
+    "http_status": 403,
+    "description": "The application does not have permission to access the requested resource.",
+    "retryable": false,
+    "action": "Check SP-API application scopes and seller authorizations. This is a configuration issue."
+  },
+  {
+    "code": "NotFound",
+    "http_status": 404,
+    "description": "The requested resource (order, listing, report, etc.) does not exist.",
+    "retryable": false,
+    "action": "Verify the resource ID. Dead-letter the item if the ID came from a previous API response."
+  },
+  {
+    "code": "QuotaExceeded",
+    "http_status": 429,
+    "description": "The request rate exceeded the endpoint's token bucket limit.",
+    "retryable": true,
+    "action": "Apply exponential backoff with jitter. Read x-amzn-RateLimit-Limit header to tune your rate limiter."
+  },
+  {
+    "code": "RequestThrottled",
+    "http_status": 429,
+    "description": "SP-API variant of QuotaExceeded — frequency of requests exceeded allowed rate.",
+    "retryable": true,
+    "action": "Same as QuotaExceeded. Back off and retry."
+  },
+  {
+    "code": "InternalError",
+    "http_status": 500,
+    "description": "An unexpected server-side error prevented the request from completing.",
+    "retryable": true,
+    "action": "Retry with exponential backoff (up to 5 times). If all retries fail, dead-letter and alert."
+  },
+  {
+    "code": "ServiceUnavailable",
+    "http_status": 503,
+    "description": "SP-API is temporarily overloaded or under maintenance.",
+    "retryable": true,
+    "action": "Retry with exponential backoff. Check the AWS Service Health Dashboard for ongoing incidents."
+  },
+  {
+    "code": "InvalidMarketplace",
+    "http_status": 400,
+    "description": "The marketplaceId provided is invalid or the seller does not operate in that marketplace.",
+    "retryable": false,
+    "action": "Verify the marketplace ID from the fixtures. Confirm the seller account is registered in that marketplace."
+  },
+  {
+    "code": "ResourceNotFound",
+    "http_status": 404,
+    "description": "A referenced sub-resource (e.g. a report document) was not found or has expired.",
+    "retryable": false,
+    "action": "Report document download URLs expire after 5 minutes. Re-fetch getReportDocument if the URL has expired."
+  }
+]

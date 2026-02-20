@@ -1,0 +1,106 @@
+{
+  "model": "token_bucket",
+  "description": "Amazon SP-API uses a token bucket model. Each endpoint has a 'rate' (refill rate) and 'burst' (bucket capacity). Exceeding burst triggers a 429.",
+  "endpoints": {
+    "getOrders": {
+      "rate": 0.0167,
+      "burst": 20,
+      "unit": "requests_per_second",
+      "note": "Very low rate — ~1 req/minute. Use delta sync with LastUpdatedAfter rather than full re-fetch."
+    },
+    "getOrder": {
+      "rate": 0.5,
+      "burst": 30,
+      "unit": "requests_per_second"
+    },
+    "getOrderItems": {
+      "rate": 0.5,
+      "burst": 30,
+      "unit": "requests_per_second"
+    },
+    "getOrderAddress": {
+      "rate": 0.5,
+      "burst": 30,
+      "unit": "requests_per_second"
+    },
+    "searchCatalogItems": {
+      "rate": 2.0,
+      "burst": 2,
+      "unit": "requests_per_second"
+    },
+    "getCatalogItem": {
+      "rate": 2.0,
+      "burst": 2,
+      "unit": "requests_per_second"
+    },
+    "putListingsItem": {
+      "rate": 5.0,
+      "burst": 10,
+      "unit": "requests_per_second",
+      "note": "For bulk catalog updates (>100 items), use the Feeds API instead."
+    },
+    "patchListingsItem": {
+      "rate": 5.0,
+      "burst": 10,
+      "unit": "requests_per_second"
+    },
+    "deleteListingsItem": {
+      "rate": 5.0,
+      "burst": 10,
+      "unit": "requests_per_second"
+    },
+    "getInventorySummaries": {
+      "rate": 2.0,
+      "burst": 2,
+      "unit": "requests_per_second"
+    },
+    "createFulfillmentOrder": {
+      "rate": 2.0,
+      "burst": 30,
+      "unit": "requests_per_second"
+    },
+    "getFulfillmentOrder": {
+      "rate": 2.0,
+      "burst": 30,
+      "unit": "requests_per_second"
+    },
+    "createReport": {
+      "rate": 0.0167,
+      "burst": 15,
+      "unit": "requests_per_second"
+    },
+    "getReport": {
+      "rate": 2.0,
+      "burst": 15,
+      "unit": "requests_per_second"
+    },
+    "getReportDocument": {
+      "rate": 0.0167,
+      "burst": 15,
+      "unit": "requests_per_second"
+    },
+    "createFeed": {
+      "rate": 0.0083,
+      "burst": 15,
+      "unit": "requests_per_second",
+      "note": "Feeds are async and preferred for bulk operations. Budget for polling getFeed after submission."
+    },
+    "getFeed": {
+      "rate": 2.0,
+      "burst": 15,
+      "unit": "requests_per_second"
+    }
+  },
+  "throttling_behavior": {
+    "status_code": 429,
+    "error_code": "QuotaExceeded",
+    "header_current_limit": "x-amzn-RateLimit-Limit",
+    "recommended_strategy": "exponential_backoff_with_jitter",
+    "initial_delay_ms": 1000,
+    "multiplier": 2,
+    "jitter": "full",
+    "max_delay_ms": 32000,
+    "max_retries": 5,
+    "implementation_note": "Read x-amzn-RateLimit-Limit on every response to dynamically adjust your token bucket, as limits can be adjusted by Amazon per seller plan."
+  }
+}

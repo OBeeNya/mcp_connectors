@@ -1,0 +1,68 @@
+{
+  "model": "daily_quota",
+  "description": "eBay primarily uses daily call quotas rather than per-second token buckets. Plan batch operations — use bulk endpoints wherever available.",
+  "endpoints": {
+    "getOrders": {
+      "calls_per_day": 1000000,
+      "note": "Very high daily limit. Prefer large page sizes (limit=200) to minimize call count."
+    },
+    "getOrder": {
+      "calls_per_day": 1000000
+    },
+    "createShippingFulfillment": {
+      "calls_per_day": 100000
+    },
+    "createOrReplaceInventoryItem": {
+      "calls_per_day": 500000,
+      "note": "Use bulkCreateOrReplaceInventoryItem for catalog sync — 25x more efficient."
+    },
+    "bulkCreateOrReplaceInventoryItem": {
+      "calls_per_day": 25000,
+      "max_items_per_call": 25,
+      "note": "Preferred for catalog sync. Batch 25 items per call. Reduces API calls by 25x vs individual endpoint."
+    },
+    "getInventoryItem": {
+      "calls_per_day": 500000
+    },
+    "getInventoryItems": {
+      "calls_per_day": 100000,
+      "max_items_per_call": 200
+    },
+    "createOffer": {
+      "calls_per_day": 100000
+    },
+    "updateOffer": {
+      "calls_per_day": 100000
+    },
+    "publishOffer": {
+      "calls_per_day": 100000
+    },
+    "bulkPublishOffer": {
+      "calls_per_day": 25000,
+      "max_items_per_call": 25,
+      "note": "Preferred for bulk listing activation."
+    },
+    "getOffers": {
+      "calls_per_day": 500000
+    },
+    "withdrawOffer": {
+      "calls_per_day": 100000
+    },
+    "bulkUpdatePriceQuantity": {
+      "calls_per_day": 25000,
+      "max_items_per_call": 25,
+      "note": "Use for price and inventory updates. Much more efficient than individual updateOffer calls."
+    }
+  },
+  "throttling_behavior": {
+    "status_code": 429,
+    "retry_after_header": "Retry-After",
+    "recommended_strategy": "exponential_backoff_with_jitter",
+    "initial_delay_ms": 2000,
+    "multiplier": 2,
+    "jitter": "full",
+    "max_delay_ms": 60000,
+    "max_retries": 4,
+    "implementation_note": "429s from eBay are rare if you use bulk endpoints and respect daily quotas. Implement a daily call counter per endpoint to catch approaching limits before hitting them."
+  }
+}

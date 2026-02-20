@@ -1,0 +1,90 @@
+{
+  "marketplace": "amazon",
+  "display_name": "Amazon Selling Partner API (SP-API)",
+  "api_style": "REST",
+  "base_url": "https://sellingpartnerapi-na.amazon.com",
+  "regional_base_urls": {
+    "NA": "https://sellingpartnerapi-na.amazon.com",
+    "EU": "https://sellingpartnerapi-eu.amazon.com",
+    "FE": "https://sellingpartnerapi-fe.amazon.com"
+  },
+  "versioning": {
+    "strategy": "date-based",
+    "format": "/orders/v0/..., /catalog/2022-04-01/...",
+    "note": "Each API group has its own version. Check the SP-API changelog before upgrading."
+  },
+  "api_groups": [
+    {
+      "name": "Orders API",
+      "version": "v0",
+      "path_prefix": "/orders/v0",
+      "description": "Retrieve and manage orders. Polling-based — no webhooks for order creation.",
+      "key_operations": ["getOrders", "getOrder", "getOrderItems", "getOrderAddress"]
+    },
+    {
+      "name": "Catalog Items API",
+      "version": "2022-04-01",
+      "path_prefix": "/catalog/2022-04-01",
+      "description": "Search and retrieve Amazon catalog data (product details, images, attributes).",
+      "key_operations": ["searchCatalogItems", "getCatalogItem"]
+    },
+    {
+      "name": "Listings Items API",
+      "version": "2021-08-01",
+      "path_prefix": "/listings/2021-08-01",
+      "description": "Create, update, and delete seller product listings.",
+      "key_operations": ["putListingsItem", "patchListingsItem", "deleteListingsItem", "getListingsItem"]
+    },
+    {
+      "name": "FBA Inventory API",
+      "version": "v1",
+      "path_prefix": "/fba/inventory/v1",
+      "description": "Query FBA (Fulfilled by Amazon) inventory levels and summaries.",
+      "key_operations": ["getInventorySummaries"]
+    },
+    {
+      "name": "Fulfillment Outbound API",
+      "version": "2020-07-01",
+      "path_prefix": "/fba/outbound/2020-07-01",
+      "description": "Multi-Channel Fulfillment (MCF) — request Amazon to ship FBA inventory to non-Amazon buyers.",
+      "key_operations": ["createFulfillmentOrder", "getFulfillmentOrder", "cancelFulfillmentOrder"]
+    },
+    {
+      "name": "Reports API",
+      "version": "2021-06-30",
+      "path_prefix": "/reports/2021-06-30",
+      "description": "Async report generation for bulk data. Preferred over per-item polling for large datasets.",
+      "key_operations": ["createReport", "getReport", "getReportDocument"]
+    },
+    {
+      "name": "Feeds API",
+      "version": "2021-06-30",
+      "path_prefix": "/feeds/2021-06-30",
+      "description": "Submit large batches of data (price updates, inventory, listings) via XML/JSON feeds.",
+      "key_operations": ["createFeed", "getFeed", "getFeedDocument", "createFeedDocument"]
+    }
+  ],
+  "auth": {
+    "summary": "OAuth2 (LWA) for access token + AWS Signature Version 4 for request signing",
+    "detail": "See get_auth_config('amazon') for full configuration."
+  },
+  "data_format": "JSON",
+  "pagination": "Cursor-based (NextToken) on all list endpoints",
+  "sandbox": {
+    "base_url": "https://sandbox.sellingpartnerapi-na.amazon.com",
+    "note": "Static sandbox responses for most endpoints. Test order IDs and ASINs provided in SP-API docs."
+  },
+  "documentation": {
+    "developer_portal": "https://developer-docs.amazon.com/sp-api/",
+    "api_reference": "https://developer-docs.amazon.com/sp-api/docs/sp-api-models",
+    "changelog": "https://developer-docs.amazon.com/sp-api/changelog",
+    "sandbox_guide": "https://developer-docs.amazon.com/sp-api/docs/the-selling-partner-api-sandbox"
+  },
+  "common_gotchas": [
+    "Order line items are NOT returned by getOrders — always call getOrderItems separately.",
+    "SP-API requires BOTH an LWA access token AND AWS SigV4 signing on every request.",
+    "Rate limits vary significantly per endpoint — do not apply a single global limit.",
+    "The Feeds API is mandatory for bulk operations (>100 items). Do not loop putListingsItem.",
+    "Marketplace IDs differ by region: ATVPDKIKX0DER (US), A1F83G8C2ARO7P (UK), A13V1IB3VIYZZH (FR)."
+  ]
+}

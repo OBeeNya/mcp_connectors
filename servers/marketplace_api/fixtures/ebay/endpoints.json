@@ -1,0 +1,172 @@
+{
+  "orders": [
+    {
+      "name": "getOrders",
+      "method": "GET",
+      "path": "/sell/fulfillment/v1/order",
+      "description": "Returns paginated list of orders. Supports filtering by status and date range.",
+      "filter_params": {
+        "filter": "creationdate:[{from}..{to}], lastmodifieddate:[{from}..], orderfulfillmentstatus:{FULFILLED|NOT_STARTED|IN_PROGRESS}"
+      },
+      "pagination_params": ["limit", "offset", "next (cursor in response)"],
+      "pagination": "cursor_based",
+      "max_page_size": 200,
+      "use_case": "Delta sync: filter by lastmodifieddate >= last_sync_timestamp. Use limit=200 for efficiency.",
+      "date_format": "ISO 8601: 2024-01-15T00:00:00.000Z"
+    },
+    {
+      "name": "getOrder",
+      "method": "GET",
+      "path": "/sell/fulfillment/v1/order/{orderId}",
+      "description": "Returns full details for a single order including line items, buyer, and shipping address.",
+      "required_params": ["orderId"],
+      "use_case": "Retrieve a single order by eBay order ID. Line items ARE included (unlike Amazon)."
+    },
+    {
+      "name": "createShippingFulfillment",
+      "method": "POST",
+      "path": "/sell/fulfillment/v1/order/{orderId}/shipping_fulfillment",
+      "description": "Marks an order as shipped with tracking information.",
+      "required_params": ["orderId", "lineItems", "shippedDate", "shippingCarrierCode", "trackingNumber"],
+      "use_case": "Submit tracking number after order is dispatched. Required to release payment on some eBay programs.",
+      "gotchas": ["shippedDate cannot be in the future."]
+    },
+    {
+      "name": "getShippingFulfillment",
+      "method": "GET",
+      "path": "/sell/fulfillment/v1/order/{orderId}/shipping_fulfillment/{fulfillmentId}",
+      "description": "Returns details of a specific shipment for an order.",
+      "required_params": ["orderId", "fulfillmentId"],
+      "use_case": "Verify that a shipment was recorded correctly."
+    }
+  ],
+  "catalog": [
+    {
+      "name": "createOrReplaceInventoryItem",
+      "method": "PUT",
+      "path": "/sell/inventory/v1/inventory_item/{sku}",
+      "description": "Creates or fully replaces the product data (title, description, images, aspects) for a SKU.",
+      "required_params": ["sku", "body"],
+      "body_fields": ["product.title", "product.description", "product.imageUrls", "product.aspects", "condition", "availability.shipToLocationAvailability.quantity"],
+      "use_case": "First step of listing flow: create the inventory item (product). Then create an offer (price/listing).",
+      "gotchas": ["This creates product data only — it does NOT create a live listing. You must also createOffer and publishOffer."]
+    },
+    {
+      "name": "bulkCreateOrReplaceInventoryItem",
+      "method": "POST",
+      "path": "/sell/inventory/v1/bulk_create_or_replace_inventory_item",
+      "description": "Creates or replaces up to 25 inventory items in a single call.",
+      "required_params": ["requests"],
+      "max_items": 25,
+      "use_case": "Preferred for catalog sync. Use batches of 25 to minimize API calls."
+    },
+    {
+      "name": "getInventoryItem",
+      "method": "GET",
+      "path": "/sell/inventory/v1/inventory_item/{sku}",
+      "description": "Returns product data and availability for a specific SKU.",
+      "required_params": ["sku"],
+      "use_case": "Verify a product's current state before update."
+    },
+    {
+      "name": "getInventoryItems",
+      "method": "GET",
+      "path": "/sell/inventory/v1/inventory_item",
+      "description": "Returns a paginated list of all inventory items for the seller.",
+      "pagination_params": ["limit", "offset"],
+      "max_page_size": 200,
+      "use_case": "Fetch full catalog for reconciliation. Use limit=200."
+    },
+    {
+      "name": "createOffer",
+      "method": "POST",
+      "path": "/sell/inventory/v1/offer",
+      "description": "Creates a listing offer (price, quantity, category, policies) for an inventory item.",
+      "required_params": ["sku", "marketplaceId", "format", "listingPolicies", "pricingSummary", "categoryId"],
+      "formats": ["FIXED_PRICE"],
+      "use_case": "Second step of listing flow: attach listing details to an inventory item. Must be published to go live."
+    },
+    {
+      "name": "publishOffer",
+      "method": "POST",
+      "path": "/sell/inventory/v1/offer/{offerId}/publish",
+      "description": "Publishes an offer to make it live on eBay.",
+      "required_params": ["offerId"],
+      "use_case": "Third and final step: activate the listing. Returns a listingId on success.",
+      "gotchas": ["A published offer IS a live eBay listing. Validate before publishing."]
+    },
+    {
+      "name": "bulkPublishOffer",
+      "method": "POST",
+      "path": "/sell/inventory/v1/bulk_publish_offer",
+      "description": "Publishes up to 25 offers in a single call.",
+      "max_items": 25,
+      "use_case": "Use for batch listing activation during catalog sync."
+    },
+    {
+      "name": "bulkUpdatePriceQuantity",
+      "method": "POST",
+      "path": "/sell/inventory/v1/bulk_update_price_quantity",
+      "description": "Updates price and/or quantity for up to 25 SKUs in one call.",
+      "max_items": 25,
+      "use_case": "Price and inventory delta updates. Most efficient endpoint for repricing and stock updates."
+    },
+    {
+      "name": "withdrawOffer",
+      "method": "POST",
+      "path": "/sell/inventory/v1/offer/{offerId}/withdraw",
+      "description": "Ends a listing (removes from eBay).",
+      "required_params": ["offerId"],
+      "use_case": "Delist a product that is out of stock or discontinued."
+    }
+  ],
+  "inventory": [
+    {
+      "name": "bulkUpdatePriceQuantity",
+      "method": "POST",
+      "path": "/sell/inventory/v1/bulk_update_price_quantity",
+      "description": "Updates the price and/or available quantity for up to 25 SKUs.",
+      "required_params": ["requests"],
+      "max_items": 25,
+      "use_case": "Primary endpoint for inventory delta sync. Use for stock level updates."
+    }
+  ],
+  "fulfillment": [
+    {
+      "name": "createShippingFulfillment",
+      "method": "POST",
+      "path": "/sell/fulfillment/v1/order/{orderId}/shipping_fulfillment",
+      "description": "Submit tracking information for a shipped order.",
+      "required_params": ["orderId", "lineItems", "shippedDate", "shippingCarrierCode", "trackingNumber"],
+      "use_case": "Required step after order dispatch to complete eBay's fulfillment flow."
+    }
+  ],
+  "reports": [
+    {
+      "name": "getTrafficReport",
+      "method": "GET",
+      "path": "/sell/analytics/v1/traffic_report",
+      "description": "Returns listing traffic data (impressions, clicks, conversion rate).",
+      "required_params": ["dimension", "metric", "filter"],
+      "use_case": "Analyze listing performance. Useful for pricing and catalog optimization decisions."
+    }
+  ],
+  "returns": [
+    {
+      "name": "getReturn",
+      "method": "GET",
+      "path": "/post-order/v2/return/{returnId}",
+      "description": "Returns details of a buyer return request.",
+      "required_params": ["returnId"],
+      "use_case": "Retrieve return details for processing. Note: returns use the separate Post-Order API."
+    },
+    {
+      "name": "issueRefund",
+      "method": "POST",
+      "path": "/post-order/v2/return/{returnId}/refund/initiate",
+      "description": "Issues a refund to the buyer for a return.",
+      "required_params": ["returnId", "refundAmount"],
+      "use_case": "Process refunds once returned item is received and inspected."
+    }
+  ]
+}

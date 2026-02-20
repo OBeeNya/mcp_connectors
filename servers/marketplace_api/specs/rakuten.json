@@ -1,0 +1,71 @@
+{
+  "marketplace": "rakuten",
+  "display_name": "Rakuten RMS Web Service (Rakuten Ichiba)",
+  "api_style": "REST (newer APIs) and SOAP/XML (legacy APIs)",
+  "base_url": "https://api.rms.rakuten.co.jp",
+  "versioning": {
+    "strategy": "path-based and service-based",
+    "format": "/es/2.0/product/, /es/1.0/order/",
+    "note": "Each service has its own version. SOAP services use separate WSDL endpoints."
+  },
+  "api_groups": [
+    {
+      "name": "Item API (Product/Catalog)",
+      "version": "1.0",
+      "path_prefix": "/es/1.0/item",
+      "description": "Create, update, and manage product listings on Rakuten Ichiba.",
+      "key_operations": ["get", "insert", "update", "delete", "search"]
+    },
+    {
+      "name": "Order API",
+      "version": "1.0",
+      "path_prefix": "/es/1.0/order",
+      "description": "Search and retrieve orders, update order status, and manage shipping information.",
+      "key_operations": ["getOrder", "searchOrder", "confirmOrder", "updateOrderShipping"]
+    },
+    {
+      "name": "Inventory API",
+      "version": "2.0",
+      "path_prefix": "/es/2.0/inventory",
+      "description": "Manage stock quantities per item and variant.",
+      "key_operations": ["getInventory", "updateInventory"]
+    },
+    {
+      "name": "Shop API",
+      "version": "1.0",
+      "path_prefix": "/es/1.0/shop",
+      "description": "Manage shop-level settings and information.",
+      "key_operations": ["get", "update"]
+    },
+    {
+      "name": "Navigation API",
+      "version": "1.0",
+      "path_prefix": "/es/1.0/navigation",
+      "description": "Access Rakuten's category tree for product classification.",
+      "key_operations": ["getGenreInformation"]
+    }
+  ],
+  "auth": {
+    "summary": "Custom ESA authentication using Base64-encoded ServiceSecret:LicenseKey",
+    "detail": "See get_auth_config('rakuten') for full configuration."
+  },
+  "data_format": "XML (legacy APIs) and JSON (newer APIs, v2.0+)",
+  "pagination": "Offset-based (page number + page size) for most list endpoints",
+  "sandbox": {
+    "note": "Rakuten does not provide a dedicated sandbox environment. Use production with test shop credentials. A test mode flag is available on some endpoints.",
+    "test_shop": "Create a test shop account via the Rakuten Partner Portal."
+  },
+  "documentation": {
+    "developer_portal": "https://webservice.rms.rakuten.co.jp/merchant-portal/",
+    "rms_portal": "https://rms.rakuten.co.jp/",
+    "api_reference": "https://webservice.rms.rakuten.co.jp/merchant-portal/view?contents=/WEB_SERVICE/RakutenOpenAPI/REST_API_Documents"
+  },
+  "common_gotchas": [
+    "Many legacy Rakuten APIs return XML even when Content-Type: application/json is requested — parse both.",
+    "Rakuten uses a custom 'ESA' auth header prefix, NOT 'Basic' or 'Bearer'.",
+    "Product pages on Rakuten are highly customized HTML — image and description fields support HTML markup.",
+    "No sandbox: test in production with a test shop. Be careful not to publish test listings publicly.",
+    "Order confirmation must be explicit — orders do NOT auto-confirm. You must call confirmOrder.",
+    "Genre (category) IDs are required for all product listings. Use the Navigation API to map your categories."
+  ]
+}

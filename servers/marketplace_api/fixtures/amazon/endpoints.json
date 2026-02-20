@@ -1,0 +1,199 @@
+{
+  "orders": [
+    {
+      "name": "getOrders",
+      "method": "GET",
+      "path": "/orders/v0/orders",
+      "description": "Returns orders created or updated during a specified time period. Primary polling endpoint.",
+      "required_params": ["MarketplaceIds"],
+      "filter_params": ["CreatedAfter", "CreatedBefore", "LastUpdatedAfter", "LastUpdatedBefore", "OrderStatuses", "FulfillmentChannels"],
+      "pagination_params": ["NextToken", "MaxResultsPerPage"],
+      "pagination": "cursor_based",
+      "pagination_field": "NextToken",
+      "use_case": "Delta sync: use LastUpdatedAfter = (last_sync_timestamp) to fetch only changed orders.",
+      "gotchas": [
+        "Order line items are NOT included. You must call getOrderItems per order.",
+        "Shipping address is NOT included. Call getOrderAddress separately.",
+        "Rate limit is very low (0.0167 req/sec). For high-volume sellers, consider the Reports API instead."
+      ]
+    },
+    {
+      "name": "getOrder",
+      "method": "GET",
+      "path": "/orders/v0/orders/{orderId}",
+      "description": "Returns details for a single order by Amazon order ID.",
+      "required_params": ["orderId"],
+      "optional_params": [],
+      "use_case": "Fetch a single order by ID (e.g. from a webhook or reference). Format: 114-1234567-1234567."
+    },
+    {
+      "name": "getOrderItems",
+      "method": "GET",
+      "path": "/orders/v0/orders/{orderId}/orderItems",
+      "description": "Returns detailed order line items for a given order ID.",
+      "required_params": ["orderId"],
+      "pagination_params": ["NextToken"],
+      "pagination": "cursor_based",
+      "pagination_field": "NextToken",
+      "use_case": "Must be called separately for every order — line items are never included in getOrders.",
+      "gotchas": ["A single order can have multiple pages of items. Always paginate."]
+    },
+    {
+      "name": "getOrderAddress",
+      "method": "GET",
+      "path": "/orders/v0/orders/{orderId}/address",
+      "description": "Returns the shipping address for the specified order.",
+      "required_params": ["orderId"],
+      "optional_params": [],
+      "use_case": "Retrieve the buyer's shipping address for fulfillment processing."
+    }
+  ],
+  "catalog": [
+    {
+      "name": "searchCatalogItems",
+      "method": "GET",
+      "path": "/catalog/2022-04-01/items",
+      "description": "Search the Amazon catalog by keyword, ASIN, UPC, EAN, or ISBN.",
+      "required_params": ["marketplaceIds"],
+      "optional_params": ["identifiers", "identifiersType", "includedData", "keywords", "brandNames", "pageToken", "pageSize"],
+      "identifier_types": ["ASIN", "UPC", "EAN", "ISBN", "GTIN"],
+      "included_data_options": ["attributes", "dimensions", "identifiers", "images", "productTypes", "relationships", "salesRanks", "summaries"],
+      "use_case": "Look up product data by barcode (UPC/EAN) or keyword. Use identifiersType=EAN for catalog matching."
+    },
+    {
+      "name": "getCatalogItem",
+      "method": "GET",
+      "path": "/catalog/2022-04-01/items/{asin}",
+      "description": "Retrieves full catalog details for a known ASIN.",
+      "required_params": ["asin", "marketplaceIds"],
+      "optional_params": ["includedData"],
+      "use_case": "Enrich product data when you already have the ASIN."
+    },
+    {
+      "name": "putListingsItem",
+      "method": "PUT",
+      "path": "/listings/2021-08-01/items/{sellerId}/{sku}",
+      "description": "Creates or fully replaces a seller listing. Requires a complete product data body.",
+      "required_params": ["sellerId", "sku", "marketplaceIds", "productType", "body"],
+      "optional_params": ["issueLocale"],
+      "use_case": "Create a new listing or fully update an existing one. Use PATCH for partial updates.",
+      "gotchas": ["PUT replaces the entire listing. Missing attributes will be cleared."]
+    },
+    {
+      "name": "patchListingsItem",
+      "method": "PATCH",
+      "path": "/listings/2021-08-01/items/{sellerId}/{sku}",
+      "description": "Partially updates a seller listing using JSON Patch operations.",
+      "required_params": ["sellerId", "sku", "marketplaceIds", "body"],
+      "body_format": "JSON Patch (RFC 6902)",
+      "use_case": "Update specific fields (e.g. price, quantity) without resending the full listing."
+    },
+    {
+      "name": "deleteListingsItem",
+      "method": "DELETE",
+      "path": "/listings/2021-08-01/items/{sellerId}/{sku}",
+      "description": "Deletes a seller listing by seller SKU.",
+      "required_params": ["sellerId", "sku", "marketplaceIds"],
+      "use_case": "Remove a product from a marketplace listing."
+    }
+  ],
+  "inventory": [
+    {
+      "name": "getInventorySummaries",
+      "method": "GET",
+      "path": "/fba/inventory/v1/summaries",
+      "description": "Returns FBA inventory summaries: available, reserved, unfulfillable quantities.",
+      "required_params": ["granularityType", "granularityId", "marketplaceIds"],
+      "optional_params": ["details", "startDateTime", "sellerSkus", "nextToken"],
+      "granularity": {"granularityType": "Marketplace", "granularityId": "{marketplace_id}"},
+      "pagination": "cursor_based",
+      "pagination_field": "nextToken",
+      "use_case": "Retrieve FBA stock levels per SKU. Use startDateTime for delta sync.",
+      "gotchas": [
+        "FBA (Fulfilled by Amazon) inventory only. For FBM stock, update via patchListingsItem (quantity attribute).",
+        "The 'details' flag must be set to true to get inbound/reserved breakdowns."
+      ]
+    }
+  ],
+  "fulfillment": [
+    {
+      "name": "createFulfillmentOrder",
+      "method": "POST",
+      "path": "/fba/outbound/2020-07-01/fulfillmentOrders",
+      "description": "Requests Amazon to ship FBA inventory to a non-Amazon destination (Multi-Channel Fulfillment).",
+      "required_params": ["sellerFulfillmentOrderId", "displayableOrderId", "displayableOrderDate", "shippingSpeedCategory", "destinationAddress", "items"],
+      "shipping_speeds": ["Standard", "Expedited", "Priority"],
+      "use_case": "Fulfill orders from other channels (your website, eBay, etc.) using Amazon FBA stock."
+    },
+    {
+      "name": "getFulfillmentOrder",
+      "method": "GET",
+      "path": "/fba/outbound/2020-07-01/fulfillmentOrders/{sellerFulfillmentOrderId}",
+      "description": "Returns status and tracking for an MCF fulfillment order.",
+      "required_params": ["sellerFulfillmentOrderId"],
+      "statuses": ["RECEIVED", "INVALID", "PLANNING", "PROCESSING", "CANCELLED", "COMPLETE", "COMPLETE_PARTIALLED", "UNFULFILLABLE"],
+      "use_case": "Poll fulfillment status and extract tracking numbers once status is COMPLETE."
+    },
+    {
+      "name": "cancelFulfillmentOrder",
+      "method": "PUT",
+      "path": "/fba/outbound/2020-07-01/fulfillmentOrders/{sellerFulfillmentOrderId}/cancel",
+      "description": "Cancels a fulfillment order if it hasn't been shipped yet.",
+      "required_params": ["sellerFulfillmentOrderId"],
+      "use_case": "Cancel an MCF order before it ships. Returns an error if the order is already shipped."
+    }
+  ],
+  "reports": [
+    {
+      "name": "createReport",
+      "method": "POST",
+      "path": "/reports/2021-06-30/reports",
+      "description": "Requests generation of an async report. Returns a reportId to poll.",
+      "required_params": ["reportType", "marketplaceIds"],
+      "optional_params": ["dataStartTime", "dataEndTime", "reportOptions"],
+      "common_report_types": [
+        "GET_FLAT_FILE_OPEN_LISTINGS_DATA",
+        "GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA",
+        "GET_ORDERS_DATA_BY_ORDER_DATE_XML",
+        "GET_FBA_FULFILLMENT_INVENTORY_ADJUSTMENTS_DATA"
+      ],
+      "use_case": "Preferred for bulk data exports. Use instead of per-item API calls for datasets >500 items."
+    },
+    {
+      "name": "getReport",
+      "method": "GET",
+      "path": "/reports/2021-06-30/reports/{reportId}",
+      "description": "Returns report metadata and processing status.",
+      "required_params": ["reportId"],
+      "statuses": ["IN_QUEUE", "IN_PROGRESS", "CANCELLED", "DONE", "FATAL"],
+      "use_case": "Poll with exponential backoff until status is DONE. Then call getReportDocument."
+    },
+    {
+      "name": "getReportDocument",
+      "method": "GET",
+      "path": "/reports/2021-06-30/documents/{reportDocumentId}",
+      "description": "Returns a pre-signed S3 URL to download the report file.",
+      "required_params": ["reportDocumentId"],
+      "use_case": "Download the report via the returned URL. URL expires after 5 minutes — download immediately.",
+      "gotchas": ["The download URL expires in 5 minutes. Do not store the URL, download immediately."]
+    }
+  ],
+  "returns": [
+    {
+      "name": "listReturnReasonCodes",
+      "method": "GET",
+      "path": "/orders/v0/listings/{sellerSKU}/returnReasonCodes",
+      "description": "Returns the valid return reason codes for a seller SKU in a marketplace.",
+      "required_params": ["sellerId", "marketplaceId", "sellerSKU"],
+      "use_case": "Fetch valid reason codes before creating a return authorization."
+    },
+    {
+      "name": "createReturnItem",
+      "method": "POST",
+      "path": "/orders/v0/orders/{orderId}/returnItem",
+      "description": "Creates a return item request for a fulfilled order.",
+      "required_params": ["orderId", "items"],
+      "use_case": "Initiate a return for a delivered order. Returns a RMA number."
+    }
+  ]
+}
