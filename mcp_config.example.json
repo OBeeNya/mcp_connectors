@@ -26,6 +26,16 @@
         "marketplace-api-server"
       ],
       "env": {}
+    },
+    "schema-mapping": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/this/repo",
+        "run",
+        "schema-mapping-server"
+      ],
+      "env": {}
     }
   }
 }

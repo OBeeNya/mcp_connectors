@@ -1,0 +1,26 @@
+{
+  "marketplace": "ebay",
+  "entity": "Product",
+  "source_endpoints": ["getInventoryItem"],
+  "notes": "eBay separates InventoryItem (product data: title, description, images, aspects, condition) from Offer (listing data: price, category, policies). To read price/stock call getOffer. To read product data call getInventoryItem. For writing, createOrReplaceInventoryItem handles product data.",
+  "amount_format": "String — e.g. \"19.99\"",
+  "fields": [
+    {"name": "sku",                                              "type": "string",  "required": true,  "description": "Seller SKU — primary identifier for both InventoryItem and Offer"},
+    {"name": "product.title",                                    "type": "string",  "required": true,  "description": "Product title"},
+    {"name": "product.description",                              "type": "string",  "required": false, "description": "Product description. Plain text; HTML is stripped by eBay."},
+    {"name": "product.imageUrls",                                "type": "array",   "required": false, "description": "Array of image URL strings. First is main image."},
+    {"name": "product.aspects",                                  "type": "object",  "required": false, "description": "Key-value product specifics. Keys are aspect names (e.g. 'Brand', 'Size'), values are arrays of strings."},
+    {"name": "product.brand",                                    "type": "string",  "required": false, "description": "Brand name (also appears in aspects)"},
+    {"name": "product.ean",                                      "type": "array",   "required": false, "description": "Array of EAN strings"},
+    {"name": "product.upc",                                      "type": "array",   "required": false, "description": "Array of UPC strings"},
+    {"name": "product.isbn",                                     "type": "array",   "required": false},
+    {"name": "product.mpn",                                      "type": "string",  "required": false},
+    {"name": "condition",                                        "type": "string",  "required": true,  "values": ["NEW", "LIKE_NEW", "VERY_GOOD", "GOOD", "ACCEPTABLE", "USED_EXCELLENT", "FOR_PARTS_OR_NOT_WORKING", "SELLER_REFURBISHED", "MANUFACTURER_REFURBISHED"]},
+    {"name": "availability.shipToLocationAvailability.quantity", "type": "integer", "required": true,  "description": "Available quantity for sale"},
+    {"name": "offer.offerId",                                    "type": "string",  "required": false, "source": "getOffer"},
+    {"name": "offer.price.value",                                "type": "string",  "required": false, "source": "getOffer"},
+    {"name": "offer.price.currency",                             "type": "string",  "required": false, "source": "getOffer"},
+    {"name": "offer.categoryId",                                 "type": "string",  "required": false, "source": "getOffer"},
+    {"name": "offer.status",                                     "type": "string",  "required": false, "source": "getOffer", "values": ["PUBLISHED", "UNPUBLISHED"], "description": "PUBLISHED = live listing"}
+  ]
+}

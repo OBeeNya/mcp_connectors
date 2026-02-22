@@ -1,0 +1,25 @@
+{
+  "marketplace": "amazon",
+  "entity": "Product",
+  "source_endpoints": ["getCatalogItem", "getListingsItem"],
+  "notes": "Amazon separates catalog data (product facts) from listing data (seller-specific: price, quantity, condition). getCatalogItem returns catalog facts; getListingsItem returns the seller's offer attributes. For creating/updating listings use putListingsItem.",
+  "amount_format": "String — e.g. \"19.99\"",
+  "fields": [
+    {"name": "Asin",                          "type": "string",      "source": "getCatalogItem",  "required": true,  "description": "Amazon Standard Identification Number. The primary product identifier on Amazon."},
+    {"name": "summaries[0].itemName",         "type": "string",      "source": "getCatalogItem",  "required": false, "description": "Product title. First element of summaries array."},
+    {"name": "summaries[0].brand",            "type": "string",      "source": "getCatalogItem",  "required": false},
+    {"name": "summaries[0].browseClassification.displayName", "type": "string", "source": "getCatalogItem", "required": false, "description": "Category path display name"},
+    {"name": "summaries[0].browseClassification.classificationId", "type": "string", "source": "getCatalogItem", "required": false},
+    {"name": "identifiers[0].identifiers",    "type": "array",       "source": "getCatalogItem",  "required": false, "description": "Array of {identifierType, identifier} objects. Types: EAN, UPC, GTIN, ISBN."},
+    {"name": "images[0].images[0].link",      "type": "string",      "source": "getCatalogItem",  "required": false, "description": "Main image URL"},
+    {"name": "images[0].images",              "type": "array",       "source": "getCatalogItem",  "required": false, "description": "All images: [{link, height, width, variant}]. Main image has variant=MAIN."},
+    {"name": "dimensions[0].package.weight.value", "type": "decimal","source": "getCatalogItem",  "required": false},
+    {"name": "dimensions[0].package.weight.unit",  "type": "string", "source": "getCatalogItem",  "required": false, "example": "kilograms"},
+    {"name": "attributes",                    "type": "object",      "source": "getCatalogItem",  "required": false, "description": "Key-value product attributes. Keys and values vary by product type."},
+    {"name": "listingItem.sku",               "type": "string",      "source": "getListingsItem", "required": true,  "description": "Seller SKU"},
+    {"name": "listingItem.attributes.list_price[0].value", "type": "string", "source": "getListingsItem", "required": false},
+    {"name": "listingItem.attributes.condition_type[0].value", "type": "string", "source": "getListingsItem", "required": false, "values": ["new_new", "used_like_new", "used_very_good", "used_good", "used_acceptable", "collectible_like_new", "refurbished_refurbished"]},
+    {"name": "listingItem.attributes.fulfillment_availability[0].quantity", "type": "integer", "source": "getListingsItem", "required": false},
+    {"name": "listingItem.summaries[0].status", "type": "array",     "source": "getListingsItem", "required": false, "description": "Array of status strings. 'BUYABLE' means the listing is active."}
+  ]
+}

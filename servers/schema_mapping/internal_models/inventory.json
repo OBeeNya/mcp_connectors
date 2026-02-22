@@ -1,0 +1,56 @@
+{
+  "entity": "Inventory",
+  "description": "Canonical inventory snapshot for a SKU on a specific marketplace.",
+  "fields": [
+    {
+      "name": "sku",
+      "type": "string",
+      "required": true,
+      "description": "Seller's internal SKU.",
+      "example": "TSHIRT-RED-L"
+    },
+    {
+      "name": "marketplace",
+      "type": "string",
+      "required": true,
+      "description": "Target marketplace: amazon | ebay | rakuten"
+    },
+    {
+      "name": "quantity_available",
+      "type": "integer",
+      "required": true,
+      "description": "Units currently available for purchase."
+    },
+    {
+      "name": "quantity_reserved",
+      "type": "integer",
+      "required": false,
+      "description": "Units reserved for pending orders (not yet shipped)."
+    },
+    {
+      "name": "quantity_inbound",
+      "type": "integer",
+      "required": false,
+      "description": "Units in transit to the fulfillment center (Amazon FBA inbound shipments)."
+    },
+    {
+      "name": "quantity_unfulfillable",
+      "type": "integer",
+      "required": false,
+      "description": "Units in fulfillment center but deemed unsellable (damaged, expired, etc.)."
+    },
+    {
+      "name": "fulfillment_channel",
+      "type": "enum",
+      "required": true,
+      "values": ["merchant", "marketplace"],
+      "description": "Who holds the stock: seller warehouse (merchant) or marketplace warehouse (FBA, etc.)."
+    },
+    {
+      "name": "last_updated_at",
+      "type": "datetime",
+      "required": true,
+      "description": "UTC timestamp of last inventory update from the marketplace."
+    }
+  ]
+}

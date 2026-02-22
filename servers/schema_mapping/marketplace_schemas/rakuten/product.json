@@ -1,0 +1,22 @@
+{
+  "marketplace": "rakuten",
+  "entity": "Product",
+  "source_endpoints": ["item_get", "item_search"],
+  "notes": "Rakuten product pages are highly customised HTML stores. ItemUrl is permanent and cannot be changed after creation. GenreId must be a leaf genre from the Navigation API. HTML is allowed in itemCaption. ItemNumber is the seller's internal SKU.",
+  "amount_format": "Integer (Japanese yen).",
+  "fields": [
+    {"name": "itemUrl",           "type": "string",  "required": true,  "description": "Unique URL slug within the shop. Used as primary identifier in all item API calls. Permanent — cannot change after creation.", "example": "my-product-001"},
+    {"name": "itemNumber",        "type": "string",  "required": true,  "description": "Seller's internal SKU or item number"},
+    {"name": "itemName",          "type": "string",  "required": true,  "description": "Product title"},
+    {"name": "catchCopy",         "type": "string",  "required": true,  "description": "Short promotional headline displayed in search results"},
+    {"name": "itemCaption",       "type": "string",  "required": false, "description": "Full product description. HTML markup is allowed and commonly used."},
+    {"name": "itemPrice",         "type": "integer", "required": true,  "description": "Selling price in yen"},
+    {"name": "genreId",           "type": "integer", "required": true,  "description": "Rakuten genre (category) ID. Must be a leaf node from the Navigation API."},
+    {"name": "imageUrl",          "type": "string",  "required": false, "description": "Primary product image URL (single value in basic API)"},
+    {"name": "itemPublicStatus",  "type": "string",  "required": false, "values": ["1", "0"], "description": "1 = publicly visible (active), 0 = hidden (inactive)"},
+    {"name": "horizontalName",    "type": "string",  "required": false, "description": "First variant axis label (e.g. 'Size'). Used if product has variants."},
+    {"name": "verticalName",      "type": "string",  "required": false, "description": "Second variant axis label (e.g. 'Color'). Used if product has two variant dimensions."},
+    {"name": "deliveryId",        "type": "integer", "required": false, "description": "Delivery method ID from Rakuten delivery settings"},
+    {"name": "asurakuDeliveryId", "type": "integer", "required": false, "description": "Asuraku (same-day/next-day) delivery ID if applicable"}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "marketplace": "amazon",
+  "entity": "Inventory",
+  "source_endpoints": ["getInventorySummaries"],
+  "notes": "FBA inventory only. For merchant-fulfilled (MFN) inventory, quantity is managed via the Listings API (fulfillment_availability attribute). Delta sync: pass startDateTime = last_sync_timestamp.",
+  "amount_format": "Integers for all quantities.",
+  "datetime_format": "ISO 8601 — e.g. \"2024-01-15T10:30:00Z\"",
+  "fields": [
+    {"name": "sku",                          "type": "string",  "required": true,  "description": "Seller SKU"},
+    {"name": "fnSku",                        "type": "string",  "required": false, "description": "Fulfillment Network SKU assigned by Amazon"},
+    {"name": "asin",                         "type": "string",  "required": false, "description": "ASIN linked to this inventory"},
+    {"name": "inventoryDetails.fulfillableQuantity",     "type": "integer", "required": false, "description": "Available-to-sell quantity. Only present when details=true."},
+    {"name": "inventoryDetails.inboundWorkingQuantity",  "type": "integer", "required": false, "description": "Units in an inbound shipment not yet received. details=true required."},
+    {"name": "inventoryDetails.inboundShippedQuantity",  "type": "integer", "required": false, "description": "Units shipped to Amazon but not yet received. details=true required."},
+    {"name": "inventoryDetails.inboundReceivingQuantity","type": "integer", "required": false, "description": "Units being received at Amazon fulfillment center. details=true required."},
+    {"name": "inventoryDetails.reservedQuantity.totalReservedQuantity","type": "integer", "required": false, "description": "Total reserved quantity. details=true required."},
+    {"name": "inventoryDetails.unfulfillableQuantity.totalUnfulfillableQuantity","type": "integer", "required": false, "description": "Units deemed unsellable. details=true required."},
+    {"name": "lastUpdatedTime",              "type": "string",  "required": false, "format": "ISO 8601", "description": "Last time this record was updated by Amazon"},
+    {"name": "productName",                  "type": "string",  "required": false, "description": "Product name from the Amazon catalog"},
+    {"name": "condition",                    "type": "string",  "required": false}
+  ]
+}

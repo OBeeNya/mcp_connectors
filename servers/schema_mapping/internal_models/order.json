@@ -1,0 +1,139 @@
+{
+  "entity": "Order",
+  "description": "Canonical order model. All marketplace connectors must produce this shape on ingestion.",
+  "fields": [
+    {
+      "name": "marketplace",
+      "type": "string",
+      "required": true,
+      "description": "Source marketplace identifier: amazon | ebay | rakuten",
+      "example": "amazon"
+    },
+    {
+      "name": "marketplace_order_id",
+      "type": "string",
+      "required": true,
+      "description": "Order ID exactly as returned by the marketplace.",
+      "example": "114-1234567-1234567"
+    },
+    {
+      "name": "status",
+      "type": "enum",
+      "required": true,
+      "values": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"],
+      "description": "Normalised order status. Map all marketplace-specific statuses to this set."
+    },
+    {
+      "name": "currency",
+      "type": "string",
+      "required": true,
+      "description": "ISO 4217 currency code.",
+      "example": "EUR"
+    },
+    {
+      "name": "total_amount",
+      "type": "decimal",
+      "required": true,
+      "description": "Grand total including tax and shipping."
+    },
+    {
+      "name": "subtotal",
+      "type": "decimal",
+      "required": false,
+      "description": "Item subtotal before tax and shipping."
+    },
+    {
+      "name": "shipping_amount",
+      "type": "decimal",
+      "required": false,
+      "description": "Shipping cost charged to buyer."
+    },
+    {
+      "name": "tax_amount",
+      "type": "decimal",
+      "required": false,
+      "description": "Total tax amount."
+    },
+    {
+      "name": "buyer_name",
+      "type": "string",
+      "required": false,
+      "description": "Buyer full name. May be absent if marketplace restricts PII."
+    },
+    {
+      "name": "buyer_email",
+      "type": "string",
+      "required": false,
+      "description": "Buyer email. May be a marketplace-anonymised relay address."
+    },
+    {
+      "name": "buyer_phone",
+      "type": "string",
+      "required": false,
+      "description": "Buyer phone number."
+    },
+    {
+      "name": "shipping_address",
+      "type": "Address",
+      "required": true,
+      "description": "Delivery address object.",
+      "shape": {
+        "name": "string",
+        "line1": "string",
+        "line2": "string | null",
+        "city": "string",
+        "state": "string | null",
+        "postal_code": "string",
+        "country_code": "string (ISO 3166-1 alpha-2)",
+        "phone": "string | null"
+      }
+    },
+    {
+      "name": "items",
+      "type": "list[OrderItem]",
+      "required": true,
+      "description": "Order line items.",
+      "item_shape": {
+        "sku": "string",
+        "marketplace_item_id": "string | null (ASIN, legacy item ID, etc.)",
+        "title": "string",
+        "quantity": "integer",
+        "unit_price": "decimal",
+        "currency": "string",
+        "tax_amount": "decimal | null",
+        "discount_amount": "decimal | null"
+      }
+    },
+    {
+      "name": "purchased_at",
+      "type": "datetime",
+      "required": true,
+      "description": "Purchase timestamp in UTC (ISO 8601)."
+    },
+    {
+      "name": "updated_at",
+      "type": "datetime",
+      "required": true,
+      "description": "Last status update timestamp in UTC (ISO 8601)."
+    },
+    {
+      "name": "shipping_method",
+      "type": "string",
+      "required": false,
+      "description": "Requested shipping service level (Standard, Expedited, etc.)."
+    },
+    {
+      "name": "fulfillment_channel",
+      "type": "enum",
+      "required": false,
+      "values": ["merchant", "marketplace"],
+      "description": "Who fulfills the order: the seller (merchant) or the marketplace (FBA, MCF)."
+    },
+    {
+      "name": "raw",
+      "type": "dict",
+      "required": false,
+      "description": "Original merged marketplace API response, stored as-is for auditability and reprocessing."
+    }
+  ]
+}

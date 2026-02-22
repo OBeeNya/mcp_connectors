@@ -1,0 +1,16 @@
+{
+  "marketplace": "ebay",
+  "entity": "Inventory",
+  "source_endpoints": ["getInventoryItem", "getInventoryItems"],
+  "notes": "eBay inventory quantity is stored inside the InventoryItem's availability object. There is no separate inventory endpoint — it's always part of the product record. Use bulkUpdatePriceQuantity for efficient delta updates.",
+  "amount_format": "Integer for quantities.",
+  "datetime_format": "Not provided in the inventory response — use current timestamp on sync.",
+  "fields": [
+    {"name": "sku",                                              "type": "string",  "required": true,  "description": "Seller SKU"},
+    {"name": "availability.shipToLocationAvailability.quantity", "type": "integer", "required": true,  "description": "Available-to-sell quantity"},
+    {"name": "offer.status",                                     "type": "string",  "required": false, "values": ["PUBLISHED", "UNPUBLISHED"], "description": "Whether the listing is live. PUBLISHED = active offer.", "source": "getOffer"},
+    {"name": "offer.price.value",                                "type": "string",  "required": false, "source": "getOffer"},
+    {"name": "offer.price.currency",                             "type": "string",  "required": false, "source": "getOffer"},
+    {"name": "condition",                                        "type": "string",  "required": false, "description": "Item condition string (see product schema for values)"}
+  ]
+}

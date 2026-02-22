@@ -1,0 +1,120 @@
+{
+  "entity": "Product",
+  "description": "Canonical product/listing model. Represents a sellable item across all marketplaces.",
+  "fields": [
+    {
+      "name": "sku",
+      "type": "string",
+      "required": true,
+      "description": "Seller's internal SKU. This is the primary identifier in our system.",
+      "example": "TSHIRT-RED-L"
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "required": true,
+      "description": "Product title/name as displayed on the marketplace.",
+      "example": "Classic Cotton T-Shirt - Red - Large"
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "required": false,
+      "description": "Full product description. HTML is allowed for Rakuten, plain text for Amazon."
+    },
+    {
+      "name": "brand",
+      "type": "string",
+      "required": false,
+      "description": "Brand or manufacturer name."
+    },
+    {
+      "name": "ean",
+      "type": "string",
+      "required": false,
+      "description": "EAN-13 barcode.",
+      "example": "5901234123457"
+    },
+    {
+      "name": "upc",
+      "type": "string",
+      "required": false,
+      "description": "UPC-A barcode.",
+      "example": "012345678905"
+    },
+    {
+      "name": "isbn",
+      "type": "string",
+      "required": false,
+      "description": "ISBN (books only)."
+    },
+    {
+      "name": "mpn",
+      "type": "string",
+      "required": false,
+      "description": "Manufacturer Part Number."
+    },
+    {
+      "name": "marketplace_product_id",
+      "type": "string",
+      "required": false,
+      "description": "Marketplace-native product ID: ASIN (Amazon), legacy item ID (eBay), ItemUrl slug (Rakuten)."
+    },
+    {
+      "name": "price",
+      "type": "decimal",
+      "required": true,
+      "description": "Current selling price."
+    },
+    {
+      "name": "currency",
+      "type": "string",
+      "required": true,
+      "description": "ISO 4217 currency code.",
+      "example": "EUR"
+    },
+    {
+      "name": "stock_quantity",
+      "type": "integer",
+      "required": true,
+      "description": "Available quantity to sell."
+    },
+    {
+      "name": "images",
+      "type": "list[string]",
+      "required": false,
+      "description": "Ordered list of image URLs. First image is the main image."
+    },
+    {
+      "name": "attributes",
+      "type": "dict",
+      "required": false,
+      "description": "Key-value product attributes (size, color, material, etc.). Marketplace-specific attribute names are normalised here."
+    },
+    {
+      "name": "condition",
+      "type": "enum",
+      "required": true,
+      "values": ["new", "refurbished", "used_like_new", "used_good", "used_acceptable"],
+      "description": "Product condition. Map marketplace-specific condition strings to this set."
+    },
+    {
+      "name": "marketplace_category_id",
+      "type": "string",
+      "required": false,
+      "description": "Marketplace-specific category/genre ID. Required for listing creation but not stored long-term."
+    },
+    {
+      "name": "is_active",
+      "type": "boolean",
+      "required": true,
+      "description": "Whether the product is currently listed and visible on the marketplace."
+    },
+    {
+      "name": "weight_kg",
+      "type": "decimal",
+      "required": false,
+      "description": "Product weight in kilograms."
+    }
+  ]
+}

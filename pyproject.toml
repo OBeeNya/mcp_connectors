@@ -10,4 +10,5 @@ dependencies = [
 ]
 
 [project.scripts]
-marketplace-api-server = "servers.marketplace_api.server:main"
+marketplace-api-server    = "servers.marketplace_api.server:main"
+schema-mapping-server     = "servers.schema_mapping.server:main"

@@ -1,0 +1,32 @@
+{
+  "marketplace": "rakuten",
+  "entity": "Order",
+  "source_endpoints": ["searchOrder", "getOrder"],
+  "merge_strategy": "Single getOrder call returns the complete order including items and shipping address. No merging needed. searchOrder is used for discovery (delta sync); call getOrder for full details.",
+  "amount_format": "Integer (Japanese yen) — e.g. 1980. Use int_to_decimal transformation. No cents.",
+  "datetime_format": "\"YYYY-MM-DD HH:MM:SS\" — e.g. \"2024-01-15 10:30:00\". Use datetime_ymd_hms transformation. NOT ISO 8601.",
+  "status_format": "Integer enum — 100, 200, 300, 400, 500, 600, 700",
+  "fields": [
+    {"name": "orderNumber",         "type": "string",  "required": true,  "description": "Rakuten order number. Primary identifier."},
+    {"name": "orderProgress",       "type": "integer", "required": true,  "values": [100, 200, 300, 400, 500, 600, 700], "description": "100=Awaiting confirmation, 200=Confirmed, 300=Awaiting payment, 400=Payment confirmed, 500=Processing, 600=Shipped, 700=Cancelled"},
+    {"name": "orderDatetime",       "type": "string",  "required": true,  "format": "YYYY-MM-DD HH:MM:SS"},
+    {"name": "lastUpdateDatetime",  "type": "string",  "required": false, "format": "YYYY-MM-DD HH:MM:SS"},
+    {"name": "goodsPrice",          "type": "integer", "required": false, "description": "Item subtotal in yen"},
+    {"name": "postagePrice",        "type": "integer", "required": false, "description": "Shipping cost in yen"},
+    {"name": "totalPrice",          "type": "integer", "required": true,  "description": "Grand total in yen"},
+    {"name": "taxRate",             "type": "decimal", "required": false, "description": "Tax rate (e.g. 0.10 for 10%)"},
+    {"name": "taxPrice",            "type": "integer", "required": false, "description": "Tax amount in yen"},
+    {"name": "senderName",          "type": "string",  "required": false, "description": "Buyer name"},
+    {"name": "senderMailAddress",   "type": "string",  "required": false, "description": "Buyer email"},
+    {"name": "senderTel",           "type": "string",  "required": false, "description": "Buyer phone number"},
+    {"name": "senderZipCode",       "type": "string",  "required": false, "description": "Postal code"},
+    {"name": "senderPrefecture",    "type": "string",  "required": false, "description": "Japanese prefecture name"},
+    {"name": "senderCity",          "type": "string",  "required": false, "description": "City name"},
+    {"name": "senderAddress",       "type": "string",  "required": false, "description": "Street address (combined in some API versions)"},
+    {"name": "packageModel[].itemNumber",   "type": "string",  "required": false, "description": "Seller SKU for this line item"},
+    {"name": "packageModel[].itemName",     "type": "string",  "required": false, "description": "Product name"},
+    {"name": "packageModel[].unitPrice",    "type": "integer", "required": false, "description": "Unit price in yen"},
+    {"name": "packageModel[].units",        "type": "integer", "required": false, "description": "Ordered quantity"},
+    {"name": "packageModel[].totalPrice",   "type": "integer", "required": false, "description": "Line total in yen"}
+  ]
+}

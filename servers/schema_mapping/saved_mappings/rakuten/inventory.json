@@ -1,0 +1,43 @@
+{
+  "marketplace": "rakuten",
+  "entity": "Inventory",
+  "version": "1.0",
+  "validated": true,
+  "merge_note": "Single inventory_getInventory call. Pass itemUrl as the identifier. inventoryCount of -1 means unlimited.",
+  "mappings": [
+    {
+      "internal_field": "sku",
+      "source_path": "itemNumber",
+      "transformation": "direct",
+      "required": true,
+      "notes": "itemNumber is the seller SKU. itemUrl is the Rakuten-specific identifier. Both may need to be stored."
+    },
+    {
+      "internal_field": "marketplace",
+      "transformation": "constant",
+      "value": "rakuten",
+      "required": true
+    },
+    {
+      "internal_field": "quantity_available",
+      "source_path": "inventoryCount",
+      "transformation": "direct",
+      "default_value": 0,
+      "required": true,
+      "notes": "inventoryCount = -1 means unlimited stock. Post-process: if qty == -1: qty = 9999 (or your sentinel value for unlimited)."
+    },
+    {
+      "internal_field": "fulfillment_channel",
+      "transformation": "constant",
+      "value": "merchant",
+      "required": true
+    },
+    {
+      "internal_field": "last_updated_at",
+      "transformation": "constant",
+      "value": null,
+      "required": true,
+      "notes": "Rakuten does not return a lastUpdated timestamp on inventory. Use datetime.utcnow() at sync time."
+    }
+  ]
+}

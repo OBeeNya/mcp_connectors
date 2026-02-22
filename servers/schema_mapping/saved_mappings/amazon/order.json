@@ -1,0 +1,125 @@
+{
+  "marketplace": "amazon",
+  "entity": "Order",
+  "version": "1.0",
+  "validated": true,
+  "merge_note": "Merge three API calls before passing to transformer: getOrders (base), getOrderItems (items array), getOrderAddress (ShippingAddress). Key all on AmazonOrderId.",
+  "mappings": [
+    {
+      "internal_field": "marketplace",
+      "transformation": "constant",
+      "value": "amazon",
+      "required": true
+    },
+    {
+      "internal_field": "marketplace_order_id",
+      "source_path": "AmazonOrderId",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "status",
+      "source_path": "OrderStatus",
+      "transformation": "enum_map",
+      "required": true,
+      "enum_map": {
+        "Pending":          "pending",
+        "Unshipped":        "confirmed",
+        "PartiallyShipped": "processing",
+        "Shipped":          "shipped",
+        "Canceled":         "cancelled",
+        "Unfulfillable":    "cancelled"
+      }
+    },
+    {
+      "internal_field": "currency",
+      "source_path": "OrderTotal.CurrencyCode",
+      "transformation": "direct",
+      "default_value": "USD",
+      "required": true
+    },
+    {
+      "internal_field": "total_amount",
+      "source_path": "OrderTotal.Amount",
+      "transformation": "str_to_decimal",
+      "required": true
+    },
+    {
+      "internal_field": "shipping_method",
+      "source_path": "ShipmentServiceLevelCategory",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "fulfillment_channel",
+      "source_path": "FulfillmentChannel",
+      "transformation": "enum_map",
+      "required": false,
+      "enum_map": {
+        "AFN": "marketplace",
+        "MFN": "merchant"
+      }
+    },
+    {
+      "internal_field": "buyer_email",
+      "source_path": "BuyerInfo.BuyerEmail",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "buyer_name",
+      "source_path": "BuyerInfo.BuyerName",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "purchased_at",
+      "source_path": "PurchaseDate",
+      "transformation": "datetime_iso",
+      "required": true
+    },
+    {
+      "internal_field": "updated_at",
+      "source_path": "LastUpdateDate",
+      "transformation": "datetime_iso",
+      "required": true
+    },
+    {
+      "internal_field": "shipping_address",
+      "source_path": "ShippingAddress",
+      "transformation": "nested_object",
+      "required": true,
+      "nested_mapping": {
+        "name":         "Name",
+        "line1":        "AddressLine1",
+        "line2":        "AddressLine2",
+        "city":         "City",
+        "state":        "StateOrRegion",
+        "postal_code":  "PostalCode",
+        "country_code": "CountryCode",
+        "phone":        "Phone"
+      }
+    },
+    {
+      "internal_field": "items",
+      "source_path": "OrderItems[]",
+      "transformation": "list_transform",
+      "required": true,
+      "item_mapping": [
+        {"internal_field": "sku",                "source_path": "SellerSKU",                  "transformation": "direct"},
+        {"internal_field": "marketplace_item_id","source_path": "ASIN",                       "transformation": "direct"},
+        {"internal_field": "title",              "source_path": "Title",                      "transformation": "direct"},
+        {"internal_field": "quantity",           "source_path": "QuantityOrdered",            "transformation": "direct"},
+        {"internal_field": "unit_price",         "source_path": "ItemPrice.Amount",           "transformation": "str_to_decimal_nested"},
+        {"internal_field": "currency",           "source_path": "ItemPrice.CurrencyCode",     "transformation": "direct"},
+        {"internal_field": "tax_amount",         "source_path": "ItemTax.Amount",             "transformation": "str_to_decimal_nested"},
+        {"internal_field": "discount_amount",    "source_path": "PromotionDiscount.Amount",   "transformation": "str_to_decimal_nested"}
+      ]
+    },
+    {
+      "internal_field": "raw",
+      "transformation": "pass_raw",
+      "required": false
+    }
+  ]
+}

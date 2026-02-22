@@ -1,0 +1,98 @@
+{
+  "marketplace": "ebay",
+  "entity": "Product",
+  "version": "1.0",
+  "validated": true,
+  "merge_note": "Merge getInventoryItem (product data) and getOffer (price, category, status) on SKU.",
+  "mappings": [
+    {
+      "internal_field": "sku",
+      "source_path": "sku",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "title",
+      "source_path": "product.title",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "description",
+      "source_path": "product.description",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "images",
+      "source_path": "product.imageUrls",
+      "transformation": "direct",
+      "required": false,
+      "notes": "Already an array of URL strings — no transformation needed"
+    },
+    {
+      "internal_field": "attributes",
+      "source_path": "product.aspects",
+      "transformation": "direct",
+      "required": false,
+      "notes": "eBay aspects is {AspectName: [value1, value2]} — compatible with internal attributes dict"
+    },
+    {
+      "internal_field": "condition",
+      "source_path": "condition",
+      "transformation": "enum_map",
+      "required": true,
+      "enum_map": {
+        "NEW":                         "new",
+        "LIKE_NEW":                    "used_like_new",
+        "VERY_GOOD":                   "used_like_new",
+        "GOOD":                        "used_good",
+        "ACCEPTABLE":                  "used_acceptable",
+        "USED_EXCELLENT":              "used_like_new",
+        "FOR_PARTS_OR_NOT_WORKING":    "used_acceptable",
+        "SELLER_REFURBISHED":          "refurbished",
+        "MANUFACTURER_REFURBISHED":    "refurbished"
+      }
+    },
+    {
+      "internal_field": "price",
+      "source_path": "offer.price.value",
+      "transformation": "str_to_decimal",
+      "required": true
+    },
+    {
+      "internal_field": "currency",
+      "source_path": "offer.price.currency",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "stock_quantity",
+      "source_path": "availability.shipToLocationAvailability.quantity",
+      "transformation": "direct",
+      "default_value": 0,
+      "required": true
+    },
+    {
+      "internal_field": "marketplace_category_id",
+      "source_path": "offer.categoryId",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "is_active",
+      "source_path": "offer.status",
+      "transformation": "enum_map",
+      "required": true,
+      "enum_map": {
+        "PUBLISHED":   true,
+        "UNPUBLISHED": false
+      }
+    },
+    {
+      "internal_field": "raw",
+      "transformation": "pass_raw",
+      "required": false
+    }
+  ]
+}

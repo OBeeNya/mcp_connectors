@@ -1,0 +1,42 @@
+{
+  "marketplace": "ebay",
+  "entity": "Inventory",
+  "version": "1.0",
+  "validated": true,
+  "merge_note": "Call getInventoryItem for quantity and getOffer for offer status. No inbound/reserved breakdown available from eBay.",
+  "mappings": [
+    {
+      "internal_field": "sku",
+      "source_path": "sku",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "marketplace",
+      "transformation": "constant",
+      "value": "ebay",
+      "required": true
+    },
+    {
+      "internal_field": "quantity_available",
+      "source_path": "availability.shipToLocationAvailability.quantity",
+      "transformation": "direct",
+      "default_value": 0,
+      "required": true
+    },
+    {
+      "internal_field": "fulfillment_channel",
+      "transformation": "constant",
+      "value": "merchant",
+      "required": true,
+      "notes": "eBay standard listings are always merchant-fulfilled."
+    },
+    {
+      "internal_field": "last_updated_at",
+      "transformation": "constant",
+      "value": null,
+      "required": true,
+      "notes": "eBay does not return a lastUpdated timestamp on inventory records. Use datetime.utcnow() at sync time."
+    }
+  ]
+}

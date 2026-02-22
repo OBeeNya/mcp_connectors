@@ -1,0 +1,94 @@
+{
+  "marketplace": "amazon",
+  "entity": "Product",
+  "version": "1.0",
+  "validated": true,
+  "merge_note": "Merge getCatalogItem (product facts) and getListingsItem (seller offer attributes) on ASIN/SKU before transforming.",
+  "mappings": [
+    {
+      "internal_field": "sku",
+      "source_path": "listingItem.sku",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "marketplace_product_id",
+      "source_path": "Asin",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "title",
+      "source_path": "summaries[0].itemName",
+      "transformation": "direct",
+      "required": true,
+      "notes": "Access via raw.get('summaries', [{}])[0].get('itemName')"
+    },
+    {
+      "internal_field": "brand",
+      "source_path": "summaries[0].brand",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "marketplace_category_id",
+      "source_path": "summaries[0].browseClassification.classificationId",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "price",
+      "source_path": "listingItem.attributes.list_price[0].value",
+      "transformation": "str_to_decimal",
+      "required": true,
+      "notes": "Access via raw.get('listingItem',{}).get('attributes',{}).get('list_price',[{}])[0].get('value')"
+    },
+    {
+      "internal_field": "currency",
+      "source_path": "listingItem.attributes.list_price[0].currency",
+      "transformation": "direct",
+      "default_value": "USD",
+      "required": true
+    },
+    {
+      "internal_field": "stock_quantity",
+      "source_path": "listingItem.attributes.fulfillment_availability[0].quantity",
+      "transformation": "direct",
+      "default_value": 0,
+      "required": true
+    },
+    {
+      "internal_field": "condition",
+      "source_path": "listingItem.attributes.condition_type[0].value",
+      "transformation": "enum_map",
+      "required": true,
+      "enum_map": {
+        "new_new":                "new",
+        "used_like_new":          "used_like_new",
+        "used_very_good":         "used_like_new",
+        "used_good":              "used_good",
+        "used_acceptable":        "used_acceptable",
+        "refurbished_refurbished":"refurbished",
+        "collectible_like_new":   "used_like_new"
+      }
+    },
+    {
+      "internal_field": "is_active",
+      "source_path": "listingItem.summaries[0].status",
+      "transformation": "direct",
+      "required": true,
+      "notes": "Check if 'BUYABLE' is in the status array. Post-process: is_active = 'BUYABLE' in raw.get('listingItem',{}).get('summaries',[{}])[0].get('status',[])"
+    },
+    {
+      "internal_field": "attributes",
+      "source_path": "attributes",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "raw",
+      "transformation": "pass_raw",
+      "required": false
+    }
+  ]
+}

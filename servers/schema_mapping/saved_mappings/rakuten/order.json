@@ -1,0 +1,138 @@
+{
+  "marketplace": "rakuten",
+  "entity": "Order",
+  "version": "1.0",
+  "validated": true,
+  "merge_note": "Single getOrder call. Items (packageModel) and sender address are included in the response. No merging needed.",
+  "mappings": [
+    {
+      "internal_field": "marketplace",
+      "transformation": "constant",
+      "value": "rakuten",
+      "required": true
+    },
+    {
+      "internal_field": "marketplace_order_id",
+      "source_path": "orderNumber",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "status",
+      "source_path": "orderProgress",
+      "transformation": "enum_map",
+      "required": true,
+      "enum_map": {
+        "100": "pending",
+        "200": "confirmed",
+        "300": "confirmed",
+        "400": "processing",
+        "500": "processing",
+        "600": "shipped",
+        "700": "cancelled"
+      },
+      "notes": "Rakuten status is an integer but JSON keys must be strings in enum_map. Cast orderProgress to str before lookup in the generated code."
+    },
+    {
+      "internal_field": "currency",
+      "transformation": "constant",
+      "value": "JPY",
+      "required": true,
+      "notes": "Rakuten Ichiba is JPY only. For other Rakuten markets (FR, US), override this constant."
+    },
+    {
+      "internal_field": "total_amount",
+      "source_path": "totalPrice",
+      "transformation": "int_to_decimal",
+      "required": true
+    },
+    {
+      "internal_field": "subtotal",
+      "source_path": "goodsPrice",
+      "transformation": "int_to_decimal",
+      "required": false
+    },
+    {
+      "internal_field": "shipping_amount",
+      "source_path": "postagePrice",
+      "transformation": "int_to_decimal",
+      "required": false
+    },
+    {
+      "internal_field": "tax_amount",
+      "source_path": "taxPrice",
+      "transformation": "int_to_decimal",
+      "required": false
+    },
+    {
+      "internal_field": "buyer_name",
+      "source_path": "senderName",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "buyer_email",
+      "source_path": "senderMailAddress",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "buyer_phone",
+      "source_path": "senderTel",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "purchased_at",
+      "source_path": "orderDatetime",
+      "transformation": "datetime_ymd_hms",
+      "required": true
+    },
+    {
+      "internal_field": "updated_at",
+      "source_path": "lastUpdateDatetime",
+      "transformation": "datetime_ymd_hms",
+      "required": true
+    },
+    {
+      "internal_field": "fulfillment_channel",
+      "transformation": "constant",
+      "value": "merchant",
+      "required": false
+    },
+    {
+      "internal_field": "shipping_address",
+      "source_path": "",
+      "transformation": "nested_object",
+      "required": true,
+      "nested_mapping": {
+        "name":        "senderName",
+        "line1":       "senderAddress",
+        "city":        "senderCity",
+        "state":       "senderPrefecture",
+        "postal_code": "senderZipCode",
+        "country_code": "",
+        "phone":       "senderTel"
+      },
+      "notes": "Rakuten address fields are top-level (not nested). country_code should be hardcoded to 'JP' for Rakuten Ichiba."
+    },
+    {
+      "internal_field": "items",
+      "source_path": "packageModel[]",
+      "transformation": "list_transform",
+      "required": true,
+      "item_mapping": [
+        {"internal_field": "sku",      "source_path": "itemNumber",  "transformation": "direct"},
+        {"internal_field": "title",    "source_path": "itemName",    "transformation": "direct"},
+        {"internal_field": "quantity", "source_path": "units",       "transformation": "direct"},
+        {"internal_field": "unit_price","source_path": "unitPrice",  "transformation": "int_to_decimal"},
+        {"internal_field": "currency", "source_path": "",            "transformation": "direct", "default_value": "JPY"}
+      ]
+    },
+    {
+      "internal_field": "raw",
+      "transformation": "pass_raw",
+      "required": false
+    }
+  ]
+}

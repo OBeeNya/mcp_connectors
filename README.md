@@ -9,7 +9,7 @@ Each server encodes marketplace-specific knowledge (auth flows, rate limits, end
 ```
 servers/
 ├── marketplace_api/      ← live: API specs, auth, rate limits, endpoints, error codes
-├── schema_mapping/       ← planned: field mapping between marketplace and internal models
+├── schema_mapping/       ← live: field mapping, canonical models, transformer code generation
 ├── codegen/              ← planned: connector scaffolding and code generation
 ├── testing/              ← planned: test generation and sandbox interaction
 └── compliance/           ← planned: marketplace listing rules and validation
@@ -47,16 +47,18 @@ Open `.env` and fill in the credentials for the marketplaces you work with. The 
 
 See `.env.example` for the full list and where to obtain each credential.
 
-### 4. Run the MCP server
+### 4. Run a server
 
 **Development mode** (with the MCP Inspector UI):
 ```bash
 uv run mcp dev servers/marketplace_api/server.py
+uv run mcp dev servers/schema_mapping/server.py
 ```
 
 **Production / stdio mode** (used by Claude Desktop and Claude Code):
 ```bash
 uv run marketplace-api-server
+uv run schema-mapping-server
 ```
 
 ---

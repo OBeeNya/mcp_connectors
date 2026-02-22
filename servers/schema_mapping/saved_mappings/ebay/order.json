@@ -1,0 +1,137 @@
+{
+  "marketplace": "ebay",
+  "entity": "Order",
+  "version": "1.0",
+  "validated": true,
+  "merge_note": "Single getOrder call. No merging needed — line items and shipping address are included in the response.",
+  "mappings": [
+    {
+      "internal_field": "marketplace",
+      "transformation": "constant",
+      "value": "ebay",
+      "required": true
+    },
+    {
+      "internal_field": "marketplace_order_id",
+      "source_path": "orderId",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "status",
+      "source_path": "orderFulfillmentStatus",
+      "transformation": "enum_map",
+      "required": true,
+      "enum_map": {
+        "NOT_STARTED": "confirmed",
+        "IN_PROGRESS":  "processing",
+        "FULFILLED":    "shipped"
+      },
+      "notes": "orderPaymentStatus should also be checked: FAILED → cancelled. Apply as post-processing override."
+    },
+    {
+      "internal_field": "currency",
+      "source_path": "pricingSummary.total.currency",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "total_amount",
+      "source_path": "pricingSummary.total.value",
+      "transformation": "str_to_decimal",
+      "required": true
+    },
+    {
+      "internal_field": "subtotal",
+      "source_path": "pricingSummary.priceSubtotal.value",
+      "transformation": "str_to_decimal",
+      "required": false
+    },
+    {
+      "internal_field": "shipping_amount",
+      "source_path": "pricingSummary.deliveryCost.shippingCost.value",
+      "transformation": "str_to_decimal",
+      "required": false
+    },
+    {
+      "internal_field": "tax_amount",
+      "source_path": "pricingSummary.tax.value",
+      "transformation": "str_to_decimal",
+      "required": false
+    },
+    {
+      "internal_field": "buyer_name",
+      "source_path": "fulfillmentStartInstructions[0].shippingStep.shipTo.fullName",
+      "transformation": "direct",
+      "required": false,
+      "notes": "Access first element of fulfillmentStartInstructions array"
+    },
+    {
+      "internal_field": "buyer_email",
+      "source_path": "buyer.buyerRegistrationAddress.email",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "buyer_phone",
+      "source_path": "fulfillmentStartInstructions[0].shippingStep.shipTo.primaryPhone.phoneNumber",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "purchased_at",
+      "source_path": "creationDate",
+      "transformation": "datetime_iso",
+      "required": true
+    },
+    {
+      "internal_field": "updated_at",
+      "source_path": "lastModifiedDate",
+      "transformation": "datetime_iso",
+      "required": true
+    },
+    {
+      "internal_field": "fulfillment_channel",
+      "transformation": "constant",
+      "value": "merchant",
+      "required": false,
+      "notes": "eBay standard orders are merchant-fulfilled. eBay-managed delivery (rare) would be 'marketplace'."
+    },
+    {
+      "internal_field": "shipping_address",
+      "source_path": "fulfillmentStartInstructions[0].shippingStep.shipTo.contactAddress",
+      "transformation": "nested_object",
+      "required": true,
+      "nested_mapping": {
+        "name":         "fullName",
+        "line1":        "addressLine1",
+        "line2":        "addressLine2",
+        "city":         "city",
+        "state":        "stateOrProvince",
+        "postal_code":  "postalCode",
+        "country_code": "countryCode"
+      },
+      "notes": "fullName is on shipTo, not contactAddress. Post-process: shipping_address['name'] = raw.get('fulfillmentStartInstructions',[{}])[0].get('shippingStep',{}).get('shipTo',{}).get('fullName')"
+    },
+    {
+      "internal_field": "items",
+      "source_path": "lineItems[]",
+      "transformation": "list_transform",
+      "required": true,
+      "item_mapping": [
+        {"internal_field": "sku",                "source_path": "sku",                    "transformation": "direct"},
+        {"internal_field": "marketplace_item_id","source_path": "legacyItemId",           "transformation": "direct"},
+        {"internal_field": "title",              "source_path": "title",                  "transformation": "direct"},
+        {"internal_field": "quantity",           "source_path": "quantity",               "transformation": "direct"},
+        {"internal_field": "unit_price",         "source_path": "lineItemCost.value",     "transformation": "str_to_decimal_nested"},
+        {"internal_field": "currency",           "source_path": "lineItemCost.currency",  "transformation": "direct"},
+        {"internal_field": "tax_amount",         "source_path": "taxes[0].amount.value",  "transformation": "str_to_decimal_nested"}
+      ]
+    },
+    {
+      "internal_field": "raw",
+      "transformation": "pass_raw",
+      "required": false
+    }
+  ]
+}

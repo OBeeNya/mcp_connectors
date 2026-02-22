@@ -1,0 +1,90 @@
+{
+  "marketplace": "rakuten",
+  "entity": "Product",
+  "version": "1.0",
+  "validated": true,
+  "merge_note": "Single item_get call. All fields are top-level in the response.",
+  "mappings": [
+    {
+      "internal_field": "sku",
+      "source_path": "itemNumber",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "marketplace_product_id",
+      "source_path": "itemUrl",
+      "transformation": "direct",
+      "required": false,
+      "notes": "itemUrl is the permanent shop-relative slug, used as the identifier in all item API calls."
+    },
+    {
+      "internal_field": "title",
+      "source_path": "itemName",
+      "transformation": "direct",
+      "required": true
+    },
+    {
+      "internal_field": "description",
+      "source_path": "itemCaption",
+      "transformation": "direct",
+      "required": false,
+      "notes": "May contain HTML markup. Strip HTML if plain text is needed downstream."
+    },
+    {
+      "internal_field": "price",
+      "source_path": "itemPrice",
+      "transformation": "int_to_decimal",
+      "required": true
+    },
+    {
+      "internal_field": "currency",
+      "transformation": "constant",
+      "value": "JPY",
+      "required": true
+    },
+    {
+      "internal_field": "images",
+      "source_path": "imageUrl",
+      "transformation": "direct",
+      "required": false,
+      "notes": "Wrap in a list: images = [raw.get('imageUrl')] if raw.get('imageUrl') else []"
+    },
+    {
+      "internal_field": "marketplace_category_id",
+      "source_path": "genreId",
+      "transformation": "direct",
+      "required": false
+    },
+    {
+      "internal_field": "is_active",
+      "source_path": "itemPublicStatus",
+      "transformation": "enum_map",
+      "required": true,
+      "enum_map": {
+        "1": true,
+        "0": false
+      }
+    },
+    {
+      "internal_field": "condition",
+      "transformation": "constant",
+      "value": "new",
+      "required": true,
+      "notes": "Rakuten does not have a structured condition field. Default to 'new'. Override manually for used goods."
+    },
+    {
+      "internal_field": "stock_quantity",
+      "source_path": "inventoryCount",
+      "transformation": "direct",
+      "default_value": 0,
+      "required": true,
+      "notes": "Populated by merging getInventory response. inventoryCount = -1 means unlimited stock; map to a sentinel value (e.g. 9999)."
+    },
+    {
+      "internal_field": "raw",
+      "transformation": "pass_raw",
+      "required": false
+    }
+  ]
+}

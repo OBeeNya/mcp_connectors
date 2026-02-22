@@ -1,0 +1,15 @@
+{
+  "marketplace": "rakuten",
+  "entity": "Inventory",
+  "source_endpoints": ["inventory_getInventory"],
+  "notes": "Rakuten inventory is managed per item, with optional variant axes (horizontal/vertical). Simple items have no axes. No inbound/reserved breakdown — only a single available count is provided.",
+  "amount_format": "Integer — unit count.",
+  "datetime_format": "Not returned. Use current UTC timestamp on sync.",
+  "fields": [
+    {"name": "itemUrl",         "type": "string",  "required": true,  "description": "Item URL slug — the primary identifier for the inventory item"},
+    {"name": "inventoryCount",  "type": "integer", "required": true,  "description": "Available quantity. Set to -1 to indicate unlimited stock (no inventory management)."},
+    {"name": "horizontalName",  "type": "string",  "required": false, "description": "First variant axis label (e.g. 'Size'). Only for products with variants."},
+    {"name": "verticalName",    "type": "string",  "required": false, "description": "Second variant axis label (e.g. 'Color'). Only for products with two variant dimensions."},
+    {"name": "itemPublicStatus","type": "string",  "required": false, "values": ["1", "0"], "description": "1=active, 0=inactive. Returned with getInventory in some API versions."}
+  ]
+}
