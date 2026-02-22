@@ -25,6 +25,7 @@ mcp = FastMCP(
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _require_marketplace(marketplace: str) -> str:
     normalized = marketplace.lower()
     if normalized not in SUPPORTED_MARKETPLACES:
@@ -53,6 +54,7 @@ def _load_spec(marketplace: str) -> dict:
 # Tools
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 def list_supported_marketplaces() -> list[str]:
     """Return the list of marketplaces this server has data for."""
@@ -74,7 +76,9 @@ def get_api_spec(marketplace: str) -> dict:
 @mcp.tool()
 def list_endpoints(
     marketplace: str,
-    category: Literal["orders", "catalog", "inventory", "fulfillment", "reports", "returns"] = "orders",
+    category: Literal[
+        "orders", "catalog", "inventory", "fulfillment", "reports", "returns"
+    ] = "orders",
 ) -> list[dict]:
     """
     List available API endpoints for a given category with method, path, parameters,
@@ -154,6 +158,7 @@ def get_error_codes(marketplace: str, http_status: int | None = None) -> list[di
 # Resources
 # ---------------------------------------------------------------------------
 
+
 @mcp.resource("marketplace://amazon/spec")
 def amazon_spec() -> str:
     """Amazon SP-API structured specification."""
@@ -189,6 +194,7 @@ def marketplace_rate_limits(marketplace: str) -> str:
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
+
 
 @mcp.prompt()
 def connector_kickoff(marketplace: str) -> str:

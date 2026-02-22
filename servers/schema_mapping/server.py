@@ -52,14 +52,18 @@ _ENTITY_TO_FILE = {
 def _require_marketplace(marketplace: str) -> str:
     n = marketplace.lower()
     if n not in SUPPORTED_MARKETPLACES:
-        raise ValueError(f"Unsupported marketplace '{marketplace}'. Supported: {SUPPORTED_MARKETPLACES}")
+        raise ValueError(
+            f"Unsupported marketplace '{marketplace}'. Supported: {SUPPORTED_MARKETPLACES}"
+        )
     return n
 
 
 def _require_entity(entity: str) -> str:
     normalized = entity.strip().capitalize()
     if normalized not in SUPPORTED_ENTITIES:
-        raise ValueError(f"Unsupported entity '{entity}'. Supported: {SUPPORTED_ENTITIES}")
+        raise ValueError(
+            f"Unsupported entity '{entity}'. Supported: {SUPPORTED_ENTITIES}"
+        )
     return normalized
 
 
@@ -78,18 +82,18 @@ def _load(path: Path) -> dict | list:
 # ---------------------------------------------------------------------------
 
 _SYNONYMS: dict[str, set[str]] = {
-    "id":          {"identifier", "number", "num", "code", "ref"},
-    "amount":      {"price", "cost", "value", "total", "sum"},
-    "date":        {"time", "datetime", "timestamp", "at"},
-    "status":      {"state", "progress", "condition"},
-    "quantity":    {"qty", "count", "units", "stock", "inventory"},
-    "name":        {"title", "label", "caption"},
+    "id": {"identifier", "number", "num", "code", "ref"},
+    "amount": {"price", "cost", "value", "total", "sum"},
+    "date": {"time", "datetime", "timestamp", "at"},
+    "status": {"state", "progress", "condition"},
+    "quantity": {"qty", "count", "units", "stock", "inventory"},
+    "name": {"title", "label", "caption"},
     "description": {"text", "content", "detail", "caption", "body"},
-    "email":       {"mail"},
-    "phone":       {"tel", "telephone"},
-    "postal":      {"zip", "postcode"},
-    "channel":     {"type", "method"},
-    "address":     {"location", "destination"},
+    "email": {"mail"},
+    "phone": {"tel", "telephone"},
+    "postal": {"zip", "postcode"},
+    "channel": {"type", "method"},
+    "address": {"location", "destination"},
 }
 
 
@@ -121,6 +125,7 @@ def _similarity(source: str, target: str) -> float:
 # ---------------------------------------------------------------------------
 # Code generator
 # ---------------------------------------------------------------------------
+
 
 def _nested_get(path: str, root: str = "raw", default: str = "None") -> str:
     """Build a Python expression for nested dict access from a dot-path."""
@@ -182,28 +187,32 @@ def _emit_field(m: dict, indent: str, enum_var_map: dict[str, str]) -> list[str]
         for int_sub, src_sub in nested.items():
             full = f"{obj_src}.{src_sub}" if obj_src else src_sub
             lines.append(f'{indent}    "{int_sub}": {_nested_get(full)},')
-        lines.append(f'{indent}}},')
+        lines.append(f"{indent}}},")
 
     elif transform == "list_transform":
         item_mapping = m.get("item_mapping", [])
         lines.append(f'{indent}"{field}": [')
-        lines.append(f'{indent}    {{')
+        lines.append(f"{indent}    {{")
         for im in item_mapping:
             lines.extend(_emit_field(im, indent + "        ", enum_var_map))
-        lines.append(f'{indent}    }}')
-        lines.append(f'{indent}    for {src.rstrip("[]").lower().replace(".", "_")} in raw.get("{src.rstrip("[]")}", [])')
-        lines.append(f'{indent}],')
+        lines.append(f"{indent}    }}")
+        lines.append(
+            f'{indent}    for {src.rstrip("[]").lower().replace(".", "_")} in raw.get("{src.rstrip("[]")}", [])'
+        )
+        lines.append(f"{indent}],")
         # Patch: list comprehensions need "item" variable in nested gets
         # Rebuild with correct item variable name
         item_var = src.rstrip("[]").split(".")[-1].lower()
         lines = [f'{indent}"{field}": [']
-        lines.append(f'{indent}    {{')
+        lines.append(f"{indent}    {{")
         for im in item_mapping:
             sub_src = im.get("source_path", "")
             sub_transform = im.get("transformation", "direct")
             sub_field = im["internal_field"]
             sub_default = im.get("default_value")
-            sub_default_repr = json.dumps(sub_default) if sub_default is not None else "None"
+            sub_default_repr = (
+                json.dumps(sub_default) if sub_default is not None else "None"
+            )
             if sub_transform == "direct":
                 expr = f'{item_var}.get("{sub_src}", {sub_default_repr})'
             elif sub_transform == "str_to_decimal":
@@ -228,12 +237,14 @@ def _emit_field(m: dict, indent: str, enum_var_map: dict[str, str]) -> list[str]
             else:
                 expr = f'{item_var}.get("{sub_src}", {sub_default_repr})'
             lines.append(f'{indent}        "{sub_field}": {expr},')
-        lines.append(f'{indent}    }}')
+        lines.append(f"{indent}    }}")
         lines.append(f'{indent}    for {item_var} in raw.get("{src.rstrip("[]")}", [])')
-        lines.append(f'{indent}],')
+        lines.append(f"{indent}],")
 
     else:
-        lines.append(f'{indent}"{field}": None,  # TODO: unsupported transformation "{transform}"')
+        lines.append(
+            f'{indent}"{field}": None,  # TODO: unsupported transformation "{transform}"'
+        )
 
     return lines
 
@@ -246,7 +257,7 @@ def _generate_python(marketplace: str, entity: str, mapping: list[dict]) -> str:
     enum_defs: list[str] = []
     for m in mapping:
         if m.get("transformation") == "enum_map":
-            var = f'_{m["internal_field"].upper()}_MAP'
+            var = f"_{m['internal_field'].upper()}_MAP"
             enum_var_map[m["internal_field"]] = var
             enum_defs.append(f"{var} = {{")
             for k, v in m.get("enum_map", {}).items():
@@ -259,7 +270,8 @@ def _generate_python(marketplace: str, entity: str, mapping: list[dict]) -> str:
     has_decimal = any(
         m.get("transformation") in ("str_to_decimal", "int_to_decimal")
         or any(
-            im.get("transformation") in ("str_to_decimal", "str_to_decimal_nested", "int_to_decimal")
+            im.get("transformation")
+            in ("str_to_decimal", "str_to_decimal_nested", "int_to_decimal")
             for im in m.get("item_mapping", [])
         )
         for m in mapping
@@ -279,9 +291,15 @@ def _generate_python(marketplace: str, entity: str, mapping: list[dict]) -> str:
     # Function definition
     out.append(f"def {func_name}(raw: dict) -> dict:")
     out.append('    """')
-    out.append(f'    Transform {marketplace} {entity} payload to the internal canonical model.')
-    out.append(f'    Auto-generated from saved_mappings/{marketplace}/{entity.lower()}.json.')
-    out.append(f'    Regenerate with: generate_transformer("{marketplace}", "{entity}")')
+    out.append(
+        f"    Transform {marketplace} {entity} payload to the internal canonical model."
+    )
+    out.append(
+        f"    Auto-generated from saved_mappings/{marketplace}/{entity.lower()}.json."
+    )
+    out.append(
+        f'    Regenerate with: generate_transformer("{marketplace}", "{entity}")'
+    )
     out.append('    """')
 
     # Datetime helpers
@@ -311,6 +329,7 @@ def _generate_python(marketplace: str, entity: str, mapping: list[dict]) -> str:
 # ---------------------------------------------------------------------------
 # Tools
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def list_entities() -> list[str]:
@@ -368,12 +387,14 @@ def list_saved_mappings() -> list[dict]:
     for path in sorted(SAVED_MAPPINGS_DIR.rglob("*.json")):
         try:
             data = _load(path)
-            results.append({
-                "marketplace": data.get("marketplace"),
-                "entity": data.get("entity"),
-                "version": data.get("version"),
-                "validated": data.get("validated", False),
-            })
+            results.append(
+                {
+                    "marketplace": data.get("marketplace"),
+                    "entity": data.get("entity"),
+                    "version": data.get("version"),
+                    "validated": data.get("validated", False),
+                }
+            )
         except Exception:
             pass
     return results
@@ -405,14 +426,18 @@ def suggest_field_mapping(
         if score > 0:
             int_tokens = _expand(_tokenize(int_field))
             shared = sorted(source_tokens & int_tokens)
-            results.append({
-                "internal_field": int_field,
-                "type": field["type"],
-                "required": field.get("required", False),
-                "confidence": round(score, 3),
-                "rationale": f"Shared tokens: {shared}" if shared else "Low overlap",
-                "description": field.get("description", ""),
-            })
+            results.append(
+                {
+                    "internal_field": int_field,
+                    "type": field["type"],
+                    "required": field.get("required", False),
+                    "confidence": round(score, 3),
+                    "rationale": f"Shared tokens: {shared}"
+                    if shared
+                    else "Low overlap",
+                    "description": field.get("description", ""),
+                }
+            )
 
     results.sort(key=lambda x: x["confidence"], reverse=True)
     return results[:top_k]
@@ -438,7 +463,9 @@ def validate_mapping(
     e = _require_entity(entity)
     internal_schema = _load(INTERNAL_MODELS_DIR / f"{_entity_filename(e)}.json")
 
-    required_fields = {f["name"] for f in internal_schema["fields"] if f.get("required")}
+    required_fields = {
+        f["name"] for f in internal_schema["fields"] if f.get("required")
+    }
     field_types = {f["name"]: f["type"] for f in internal_schema["fields"]}
 
     mapped = [m["internal_field"] for m in mapping]
@@ -481,8 +508,8 @@ def validate_mapping(
         "type_warnings": type_warnings,
         "summary": (
             "Mapping is valid and ready for code generation."
-            if valid else
-            f"{len(missing_required)} required field(s) missing: {missing_required}"
+            if valid
+            else f"{len(missing_required)} required field(s) missing: {missing_required}"
         ),
     }
 
@@ -516,7 +543,9 @@ def generate_transformer(
         mapping = saved["mappings"]
 
     if language != "python":
-        raise ValueError(f"Language '{language}' not supported yet. Only 'python' is available.")
+        raise ValueError(
+            f"Language '{language}' not supported yet. Only 'python' is available."
+        )
 
     return _generate_python(m, e, mapping)
 
@@ -524,6 +553,7 @@ def generate_transformer(
 # ---------------------------------------------------------------------------
 # Resources
 # ---------------------------------------------------------------------------
+
 
 @mcp.resource("internal://data-model/{entity}")
 def internal_model_resource(entity: str) -> str:
@@ -539,13 +569,16 @@ def saved_mapping_resource(marketplace: str, entity: str) -> str:
     e = _require_entity(entity)
     path = SAVED_MAPPINGS_DIR / m / f"{_entity_filename(e)}.json"
     if not path.exists():
-        return json.dumps({"found": False, "note": f"No saved mapping for {marketplace}/{entity}"})
+        return json.dumps(
+            {"found": False, "note": f"No saved mapping for {marketplace}/{entity}"}
+        )
     return path.read_text()
 
 
 # ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
+
 
 @mcp.prompt()
 def map_entity(marketplace: str, entity: str) -> str:
@@ -592,6 +625,7 @@ Review and update the saved mapping for **{marketplace} {entity}**.
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
 
 def main():
     mcp.run()
