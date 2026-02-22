@@ -278,11 +278,11 @@ def _generate_python(marketplace: str, entity: str, mapping: list[dict]) -> str:
 
     # Function definition
     out.append(f"def {func_name}(raw: dict) -> dict:")
-    out.append(f'    """')
+    out.append('    """')
     out.append(f'    Transform {marketplace} {entity} payload to the internal canonical model.')
     out.append(f'    Auto-generated from saved_mappings/{marketplace}/{entity.lower()}.json.')
     out.append(f'    Regenerate with: generate_transformer("{marketplace}", "{entity}")')
-    out.append(f'    """')
+    out.append('    """')
 
     # Datetime helpers
     out.append("    def _dt_iso(s: str | None):")
